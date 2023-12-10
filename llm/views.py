@@ -637,8 +637,8 @@ def fake_generate_image(prompt):
     end_time = timezone.now()
 
     elapsed_time = (end_time - start_time).total_seconds()
-    # return "fake", "https://images.pexels.com/photos/3172740/pexels-photo-3172740.jpeg", "This is a fake revised prompt", start_time, end_time, elapsed_time
-    return "fake", "http://127.0.0.1:8000/media/images/609b5074-ea9a-40b7-957b-bc747d26c1b6.png", "This is a fake revised prompt", start_time, end_time, elapsed_time
+    return "fake", "https://images.pexels.com/photos/3172740/pexels-photo-3172740.jpeg", "This is a fake revised prompt", start_time, end_time, elapsed_time
+    # return "fake", "http://127.0.0.1:8000/media/images/609b5074-ea9a-40b7-957b-bc747d26c1b6.png", "This is a fake revised prompt", start_time, end_time, elapsed_time
 
 
 def generate_image(prompt):
