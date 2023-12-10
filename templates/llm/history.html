@@ -1,0 +1,235 @@
+{% extends "webllm/base.html" %}
+{% load static %}
+
+
+{% block extended_style %}
+<style>
+.btn-modal {
+  z-index: 300;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.result-bundle {
+  border: 1px solid lightgray; 
+  /*border-radius: 10px;*/
+  padding: 10px;
+}
+.result-selected {
+  border: 2px solid red;
+}
+</style>
+{% endblock extended_style %}
+
+
+{% block content %}
+<h1>{{user_input.user_input}}</h1>
+
+
+
+
+{% for item in history %}
+
+{% if item.images %}
+<hr>
+<div>
+  <h3>Iteration {{ item.images.0.iteration }}</h3>
+</div>
+
+<div class="row">
+  {% for image in item.images %}
+
+  <div class="result-bundle col-sm-6 col-lg-3">
+
+
+    <img src={{ image.image.url }} class="img-fluid"><button type="button" class="btn btn-secondary btn-modal"><i class="fas fa-search-plus"></i></button>
+    Image ID: {{image.instance}}
+    <h5 class="mt-3">Attributes</h5>
+    <pre><p>{{ image.attributes | pprint }}</p></pre>
+    <h5 class="mt-3">DALL·E 3 image prompt</h5>
+    <p>{{ image.revised_prompt }}</p>
+
+
+    <h5>{{ image.role }}</h5>
+
+
+    {% if image.attribute_feedback %}
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+          <th>Feedback</th>
+          </tr>
+        </thead>
+        {% for key, value in image.attribute_feedback.items %}
+        <tr>
+          <td>{{ key }}</td>
+          <td>{{ value.value }}</td>
+          <td>{% if value.feedback == 1 %}<span class="badge badge-success">Good</span>{% elif value.feedback == -1 %}<span class="badge badge-danger">Bad</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+
+  {% if item.parent1 %}
+  <h5>Parent 1 is from iteration {{ item.parent1.iteration }}</h5>
+  Parent ID: {{ item.parent1.id }}<br>
+
+  <div class="row">
+    <div class="result-bundle col-sm-6 col-lg-3">
+      <table class="table table-sm table-bordered">
+        <tr>
+          <td>Attribute</td>
+          <td>Value</td>
+          <td>Feedback</td>
+        </tr>
+        {% for key, value in item.parent1.attribute_feedback.items %}
+        <tr>
+          <td>{{ key }}</td>
+          <td>{{ value.value }}</td>
+          <td>{% if value.feedback == 1 %}Good{% elif value.feedback == -1 %}Bad{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if item.parent2 %}
+  <h5>Parent 2 is from iteration {{ item.parent2.iteration }}</h5>
+  Parent ID: {{ item.parent2.id }}<br>
+
+  <div class="row">
+    <div class="result-bundle col-sm-6 col-lg-3">
+      <table class="table table-sm table-bordered">
+        <tr>
+          <td>Attribute</td>
+          <td>Value</td>
+          <td>Feedback</td>
+        </tr>
+        {% for key, value in item.parent2.attribute_feedback.items %}
+        <tr>
+          <td>{{ key }}</td>
+          <td>{{ value.value }}</td>
+          <td>{% if value.feedback == 1 %}Good{% elif value.feedback == -1 %}Bad{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+
+  {% if item.crossover %}
+
+  <h5 class="mt-3">Crossover</h5>
+
+  Parent 1 and Parent 2 crossover result:
+  <pre>{{ item.crossover.result | pprint }}</pre>
+
+  <div><h5 class="mt-3">Children after crossover</h5></div>
+
+  <div class="row">
+    <div class="result-bundle col-sm-6 col-lg-3">
+     <pre>{{ item.children.children_after_crossover.0 | pprint }}</pre>
+   </div>
+   <div class="result-bundle col-sm-6 col-lg-3">
+     <pre>{{ item.children.children_after_crossover.1 | pprint }}</pre>
+   </div>
+   <div class="result-bundle col-sm-6 col-lg-3">
+    <pre>{{ item.children.children_after_crossover.2 | pprint }}</pre>
+  </div>
+  <div class="result-bundle col-sm-6 col-lg-3">
+    <pre>{{ item.children.children_after_crossover.3 | pprint }}</pre>
+  </div>
+</div>
+
+
+{% endif %}
+
+{% if item.mutation %}
+<div>
+  <h5 class="mt-3">Mutation</h5>
+  Values to avoid:<pre>{{ item.mutation.avoid_values }}</pre>
+</div>
+
+
+Results:
+<div class="row">
+  <div class="result-bundle col-sm-6 col-lg-3">
+    {{ item.mutation.result.0 }}
+  </div>
+  <div class="result-bundle col-sm-6 col-lg-3">
+    {{ item.mutation.result.1 }}
+  </div>
+  <div class="result-bundle col-sm-6 col-lg-3">
+    {{ item.mutation.result.2 }}
+  </div>
+  <div class="result-bundle col-sm-6 col-lg-3">
+    {{ item.mutation.result.3 }}
+  </div>
+</div>
+
+<div><h5 class="mt-3">Children after mutation</h5></div>
+
+<div class="row">
+  <div class="result-bundle col-sm-6 col-lg-3">
+   <pre>{{ item.children.children_after_mutation.0 | pprint}}</pre>
+ </div>
+ <div class="result-bundle col-sm-6 col-lg-3">
+   <pre>{{ item.children.children_after_mutation.1 | pprint}}</pre>
+ </div>
+ <div class="result-bundle col-sm-6 col-lg-3">
+  <pre>{{ item.children.children_after_mutation.2 | pprint}}</pre>
+</div>
+<div class="result-bundle col-sm-6 col-lg-3">
+  <pre>{{ item.children.children_after_mutation.3 | pprint}}</pre>
+</div>
+</div>
+{% endif %}
+
+{% endif %}
+{% endfor %}
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        {# <h5 class="modal-title" id="myModalLabel">Modal title</h5> #}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="large-image-src" class="img-fluid mx-auto d-block"/>
+      </div>
+      {# <div class="modal-footer"> #}
+        {# <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> #}
+      {# </div> #}
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+
+{% block scripts %}
+<script>
+
+$('.btn-modal').on('click', function(e){ 
+  var url = $(this).prev('img').attr('src');
+  console.log($(this).closest('img'));
+  $('#large-image-src').attr('src', url);
+  $('#myModal').modal('show');
+});
+
+</script>
+{% endblock scripts %}
