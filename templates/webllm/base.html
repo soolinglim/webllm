@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% endblock title %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="180x180" href="{% static "img/logo/logo.png" %}">
@@ -53,63 +53,64 @@
    </noscript>
 
    {% block navbar_top %}
-   {# <nav class="navbar navbar-expand fixed-top navbar-dark bg-dark">  #}
-    <nav class="navbar navbar-expand fixed-top navbar-light bg-light"> 
-      <a class="navbar-brand"{% block brand_href %} href="/"{% endblock brand_href %}>
-        <span><img src="{% block logo %}{% static 'img/logo/logo.png' %}{% endblock logo %}" height="30" class="d-inline-block align-top" alt=""/></span>
-        <span class="navbar-name">SCAPE <small class="ml-3 d-sm-none d-md-inline">Searching Conceptual Architecture Prompts using Evolution</small></span>
-      </a>
 
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+   <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light"> 
+    <a class="navbar-brand"{% block brand_href %} href="/"{% endblock brand_href %}>
+      <span><img src="{% block logo %}{% static 'img/logo/logo.png' %}{% endblock logo %}" height="30" class="d-inline-block align-top" alt=""/></span>
+      <span class="navbar-name">SCAPE <small class="ml-3 d-sm-none d-md-inline">Searching Conceptual Architecture Prompts using Evolution</small></span>
+    </a>
 
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
-          {% block custom_navbar %}
-          {% endblock custom_navbar %}
-        </ul>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <ul class="navbar-nav ml-auto">
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        {% block custom_navbar %}
+        {% endblock custom_navbar %}
+      </ul>
 
-          {% block original_navbar %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'llm_all_runs' %}">Gallery</a>
-          </li>
-          {# <li class="nav-item"> #}
-            {# <a class="nav-link" href="{% url 'llm_landing' %}">Restart</a> #}
-          {# </li> #}
-           <a class="btn btn-outline-success my-2 my-sm-0" href="{% url 'llm_landing' %}">Restart</a>
-          {% endblock original_navbar %}
-        </ul>
-      </div><!-- /.navbar-collapse -->
+      <ul class="navbar-nav ml-auto">
 
-    </nav>
-    {% endblock navbar_top %}
+        {% block original_navbar %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'llm_all_runs' %}">Gallery</a>
+        </li>
+        {# <li class="nav-item"> #}
+          {# <a class="nav-link" href="{% url 'llm_landing' %}">Restart</a> #}
+        {# </li> #}
+        <li class="nav-item"><a class="btn btn-outline-success " href="{% url 'llm_landing' %}">Restart</a></li>
+        {% endblock original_navbar %}
+      </ul>
+    </div><!-- /.navbar-collapse -->
 
-    <div class="container-fluid h-100">
-      {% block content %}
-      {% endblock content %}
-    </div>
+  </nav>
 
-    {% block bottom_nav %}
-    {% endblock bottom_nav %}
+  {% endblock navbar_top %}
 
-    {% block footer %}
-    {% endblock footer %}
+  <div class="container-fluid h-100">
+    {% block content %}
+    {% endblock content %}
+  </div>
 
-    {% compress js %}
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  {% block bottom_nav %}
+  {% endblock bottom_nav %}
 
-    {% block script_links %}{% endblock script_links %}
-    <script type="text/javascript" src="{% static "js/csrf.min.js" %}"></script>
-    {% block scripts %}{% endblock scripts %}
-    {% endcompress js %}
+  {% block footer %}
+  {% endblock footer %}
 
-    {% if not debug %}
+  {% compress js %}
+  <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+  {% block script_links %}{% endblock script_links %}
+  <script type="text/javascript" src="{% static "js/csrf.min.js" %}"></script>
+  {% block scripts %}{% endblock scripts %}
+  {% endcompress js %}
+
+  {% if not debug %}
 <!-- Default Statcounter code for Hubbub
   https://heyhubbub.com -->
   <script type="text/javascript">
