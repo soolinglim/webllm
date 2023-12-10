@@ -292,14 +292,13 @@ $(document).ready(function() {
   });
 
 
-  function get_feedback_from_id(id, parent){
-    feedback_list = $('#' + 'feedback-iteration-' + userIteration + '-id-' + id + '>.feedback-list').find('.user-feedback-attribute');
+  function get_feedback_from_id(parent_id, parent){
+    feedback_list = $('#' + 'feedback-iteration-' + userIteration + '-id-' + parent_id).find('.user-feedback-attribute');
     parent_feedback = {}
     parent_positives = {}
     parent_negatives = {}
     parent_positive_keys = []
     parent_negative_keys = []
-
     $.each( feedback_list , function(){
       key = $(this).find('td:first-child').attr("class");
       key = key.replace("feedback-", "");
@@ -469,7 +468,7 @@ $(document).ready(function() {
     var imageUrl = $('#' + parentIdStub + itemID + " img").attr('src');
 
     var item = attributesDictionary[itemID];
-    newhtml = '<div id="feedback-iteration-' + userIteration + '-id-' + itemID + '" class="col-sm-12 col-lg-6 feedback-group"><div class="row"><div class="col-sm-4 col-lg-4"><img src="' + imageUrl + '" class="img-fluid"/></div><div class="col-sm-8 col-lg-8"><div class="table-responsive"><table class="table table-sm table-striped feedback-list mx-auto"><thead><tr><th></th><th></th><th>Your feedback</th></tr></thead><tbody>';
+    newhtml = '<div id="feedback-iteration-' + userIteration + '-id-' + itemID + '" class="col-sm-12 col-lg-6 feedback-group"><div class="row"><div class="col-sm-4 col-lg-4"><img src="' + imageUrl + '" class="img-fluid"/></div><div class="col-sm-8 col-lg-8"><div class="table-responsive"><table class="table table-sm table-striped mx-auto"><thead><tr><th></th><th></th><th>Your feedback</th></tr></thead><tbody>';
     $.each( item, function( key, value ) {
       keyClass = key.replace(' ', '-');
       newhtml += '<tr class="user-feedback-attribute"><td class="feedback-' + keyClass + '"><b>' + key + '</b></td><td>' + value + '</td><td><button class="btn btn-sm btn-outline-secondary feedback-btn btn-good">Good</button> <button class="btn btn-sm btn-outline-secondary feedback-btn btn-bad">Bad</button></td></tr>'
