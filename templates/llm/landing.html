@@ -10,7 +10,7 @@ body {
   width: 1400px;
 }
 .thank-you-div {
-  padding-top: 100px;
+  padding-top: 150px;
 }
 #final-box {
   border: 1px solid lightgray; 
@@ -246,12 +246,10 @@ $(document).ready(function() {
     });
 
 
-
-
     var old_height = $(document).height(); /* store document height before modifications */
     var old_scroll = $(window).scrollTop(); /* remember the scroll position */
 
-    $('#prompt-results').prepend('<div class="text-center full-height-div"><div class="thank-you-div">Thank you for participating in this study. To generate more images, click the "Restart" button in the menu bar.</div></div>');
+    $('#prompt-results').prepend('<div class="text-center full-height-div"><div class="thank-you-div">Thank you for participating in this study. <a href="{% url 'llm_landing' %}" class="ml-3 btn btn-success" role="button">Generate more images!</a></div></div>');
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
 
@@ -270,7 +268,7 @@ $(document).ready(function() {
 
     // $('#' + iterationIdStub + userIteration + '>.crossover-btn-div').append('<div class="col-12 mt-2 mb-2 text-center"></div>');
 
-    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><h3>Please select your favourite image from all the images below by clicking on it and rate the attributes.</h3></div>');
+    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><h4>Please select your favourite image from all the images below by clicking on it and rate the attributes.</h4></div>');
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
     scrollToTop();
@@ -289,7 +287,7 @@ $(document).ready(function() {
 
     $('#' + iterationIdStub + userIteration + '>.crossover-btn-div').append('<div class="col-12 mt-2 mb-2 text-center"><button id="btn-crossover" type="submit" class="btn btn-primary btn-lg" disabled>Generate new images from feedback</button></div>');
 
-    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><h3>Please select two images that you like most by clicking on them. Rate the attributes good or bad. We use this information to generate new images. You must pick two images before we can proceed. You can pick images from any iteration.</h3></div>');
+    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><h4>Please select two images that you like most by clicking on them. Rate the attributes good or bad. We use this information to generate new images. You must pick two images before we can proceed. You can pick images from any iteration.</h4></div>');
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
     scrollToTop();

@@ -19,6 +19,7 @@ class UserInput(models.Model):
     end_time = models.DateTimeField(null=True, blank=True)
     elapsed_time = models.IntegerField(blank=True, null=True)
     version = models.IntegerField(blank=True, null=True)
+    hide = models.BooleanField(default=False)
 
 
 class ImagePrompt(models.Model):
