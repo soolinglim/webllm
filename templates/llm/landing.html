@@ -481,7 +481,7 @@ function scrollToTop(){
 
       attributesDictionary[current_id] = child;
 
-      $('#' + iterationIdStub + userIteration + '>.images-div').prepend('<div class="result-bundle col-3" id="' + parentIdStub + current_id + '">' + imageLoading + '<div>' + formatAttributes(child) + '</div></div>');
+      $('#' + iterationIdStub + userIteration + '>.images-div').append('<div class="result-bundle col-3" id="' + parentIdStub + current_id + '">' + imageLoading + '<div>' + formatAttributes(child) + '</div></div>');
 
       /* to do: set the loading height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
 

@@ -47,7 +47,7 @@ keyword_examples = ['architectural style', 'site', 'colors', 'lighting', 'shape/
 def get_all_runs(request):
     real_runs = UserInput.objects.exclude(response="fake").exclude(response="").filter(version=1).exclude(hide=True).order_by('-timestamp')
     for run in real_runs:
-        images = Image.objects.filter(session=run.session).order_by('instance')[::-1][:4] # get the final 4 instance, sorted in the right order
+        images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1] # get the final 4 instance, sorted in the right order
         run.images = images
     return render(request, 'llm/all_runs.html', {
     'runs': real_runs,
