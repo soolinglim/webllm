@@ -56,9 +56,11 @@ class UserSelectionFeedback(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     parent1_id = models.CharField(max_length=8, blank=True)
     parent1_json = models.TextField(blank=True)
+    parent1_image = models.URLField(blank=True, null=True)
     parent1_feedback = models.TextField(blank=True)
     parent2_id = models.CharField(max_length=8, blank=True)
     parent2_json = models.TextField(blank=True)
+    parent2_image = models.URLField(blank=True, null=True)
     parent2_feedback = models.TextField(blank=True)
     current_iteration_results = models.TextField(blank=True)
 
@@ -69,10 +71,10 @@ class Crossover(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     parent1_id = models.CharField(max_length=8, blank=True)
     parent1 = models.TextField(blank=True)
-    parent1_image = models.URLField(blank=True)
+    parent1_image = models.URLField(blank=True, null=True)
     parent2_id = models.CharField(max_length=8, blank=True)
     parent2 = models.TextField(blank=True)
-    parent2_image = models.URLField(blank=True)
+    parent2_image = models.URLField(blank=True, null=True)
     prompt = models.TextField(blank=True)
     response = models.TextField(blank=True)
     result = models.TextField(blank=True)
@@ -101,3 +103,18 @@ class Children(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     children_after_crossover = models.TextField(blank=True)
     children_after_mutation = models.TextField(blank=True)
+
+
+class FinalFeedback(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    session = models.UUIDField(blank=True, null=True, default=None)
+    user_input = models.TextField(blank=True)
+    iteration = models.IntegerField(blank=True, null=True)
+    final_id = models.CharField(max_length=8, blank=True)
+    final_json = models.TextField(blank=True)
+    final_image = models.URLField(blank=True, null=True)
+    final_feedback = models.TextField(blank=True)
+    current_iteration_results = models.TextField(blank=True)
+    comments = models.TextField(blank=True)
+    contact = models.TextField(blank=True)
+

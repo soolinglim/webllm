@@ -56,6 +56,7 @@
 
 {% endfor %}
 
+{% comment %}
 <table class="table table-sm table-bordered">
   <tr>
     <td>Timestamp</td>
@@ -63,8 +64,6 @@
     <td>Final images</td>
   </tr>
   {% for run in runs %}
-
-
   <tr>
     <td>{{ run.timestamp }}</td>
     <td>{{ run.user_input }} <a href="{% url 'llm_history' uuid_param=run.session %}">[View details]</a></td>
@@ -74,15 +73,12 @@
       <img src={{ run.images.2.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
       <img src={{ run.images.3.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
     </td>
-
   </tr>
-
-
   {% endfor %}
 </table>
 
 <h1>{{user_input.user_input}}</h1>
-
+{% endcomment %}
 
 
 

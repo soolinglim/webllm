@@ -4,6 +4,24 @@
 
 {% block extended_style %}
 <style>
+body {
+  min-width: 1400px;
+  width: auto !important;
+  width: 1400px;
+}
+.thank-you-div {
+  padding-top: 100px;
+}
+#final-box {
+  border: 1px solid lightgray; 
+}
+#final-box .feedback-group {
+  border: none;
+}
+#final-rating {
+  /*border: 1px solid lightgray; */
+  height: 320px;
+}
 .full-height-div {
   height: 100vh;
 }
@@ -23,6 +41,12 @@
 .backend-error {
   padding-top: 100px;
   padding-bottom: 100px;
+}
+.image-error {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 100px;
+  padding-bottom: 150px;
 }
 #attributes-loading-gif {
   height: 100vh;
@@ -147,8 +171,13 @@ var userIteration = 0;
 var currentIterationResults = {};
 var attributesDictionary = {};
 var canSelectImage = false;
+var canSelectFinalImage = false;
+var DelaySeconds = 10;
 
-var backendErrorHtml = '<div class="backend-error text-center">There has been an error. Please try again later.</div>'
+var finalSelectedImageID = "";
+
+var backendErrorHtml = '<div class="backend-error text-center"><p>There has been an error.</p><p>Please try again later.</p></div>'
+var dalleImageErrorHtml = '<div class="image-error text-center"><p>Unable to generate image: DALL·E 3 error</p><p>Please try again later.</p></div>'
 var parentIdStub = "result-"
 var iterationIdStub = "iteration-"
 
@@ -179,6 +208,72 @@ $(document).ready(function() {
     if ((e.which === 13) && !$('#btn-submit').prop('disabled')) {
       $("#btn-submit").click();
     }
+  });
+
+  $('#prompt-results').on('click', '#submit-final-feedback', function() {
+    $('#submit-final-feedback').attr('disabled', true);
+    $('#user-details').attr('disabled', true);
+    $('#user-comments').attr('disabled', true);
+    $('.feedback-btn').attr('disabled', true);
+
+    final = attributesDictionary[finalSelectedImageID];
+
+    final_image = $('#' + parentIdStub + finalSelectedImageID + " img").attr('src');
+    [final_feedback, final_positives, final_negatives, final_positive_keys, final_negative_keys] = get_feedback_from_id(finalSelectedImageID, final);
+
+    $.ajax({
+      type: 'POST',
+      data : {
+        'session': userSession,
+        'user_input': userInput,
+        'iteration': userIteration,
+        'final_id': finalSelectedImageID,
+        'final_json': JSON.stringify(final),
+        'final_image': final_image,
+        'final_feedback': JSON.stringify(final_feedback),
+        'current_iteration_results': JSON.stringify(currentIterationResults),
+        'comments': $('#user-comments').val(),
+        'contact': $('#user-details').val(),
+      },
+      url: "{% url 'ajax_final_feedback' %}",
+      complete: function(jqXHR, textStatus) {
+        if (textStatus == 'success') {
+          selectedResultList = [];
+          currentIterationResults = {};
+          $('.result-bundle').removeClass('result-selected');
+        } 
+      }
+    });
+
+
+
+
+    var old_height = $(document).height(); /* store document height before modifications */
+    var old_scroll = $(window).scrollTop(); /* remember the scroll position */
+
+    $('#prompt-results').prepend('<div class="text-center full-height-div"><div class="thank-you-div">Thank you for participating in this study. To generate more images, click the "Restart" button in the menu bar.</div></div>');
+
+    $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
+
+    scrollToTop();
+  })
+
+
+  $('#prompt-results').on('click', '#btn-finish', function() { 
+    canSelectFinalImage = true;
+    var old_height = $(document).height(); /* store document height before modifications */
+    var old_scroll = $(window).scrollTop(); /* remember the scroll position */
+
+    $('.continue-or-done-buttons-div').empty();
+
+    $('#' + iterationIdStub + userIteration + '>.parents-div').append('<div id="final-box" class="col-12"><div class="row"><div id="final-rating" class="col-6 mt-3">Favourite image</div><div id="final-comment" class="col-6"></div></div></div>');
+
+    // $('#' + iterationIdStub + userIteration + '>.crossover-btn-div').append('<div class="col-12 mt-2 mb-2 text-center"></div>');
+
+    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><h3>Please select your favourite image from all the images below by clicking on it and rate the attributes.</h3></div>');
+
+    $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
+    scrollToTop();
   });
 
 
@@ -219,7 +314,7 @@ $(document).ready(function() {
     });
   }
 
-  function getImage(current_id, attributes){
+  function getImage(current_id, attributes, delay){
     $.ajax({
       type: 'POST',
       data : {
@@ -228,6 +323,7 @@ $(document).ready(function() {
         'instance': current_id,
         'user_input': userInput,
         'attributes': attributes,
+        'delay': delay,
       },
       url: "{% url 'ajax_get_image' %}",
       complete: function(jqXHR, textStatus) {
@@ -250,12 +346,16 @@ $(document).ready(function() {
             currentIterationResults[current_id]["revised_prompt"] = jqXHR.responseJSON.revised_prompt;
           } else {
 
-            $('#' + parentIdStub + current_id).prepend(backendErrorHtml);
+            $('#' + parentIdStub + current_id).prepend(dalleImageErrorHtml);
+
+            /* to do set the error height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
+
           }
         } 
       }
     });
   }
+
 
 
   $('#prompt-results').on('click', '.result-bundle', function() {
@@ -289,6 +389,27 @@ $(document).ready(function() {
       if (selectedResultList.length == 2){
         $('#btn-crossover').attr('disabled', false);
       }
+    } else if (canSelectFinalImage){
+      $('.result-selected').removeClass('result-selected');
+      $(this).addClass('result-selected');
+
+      if (finalSelectedImageID){
+        $('#feedback-iteration-' + userIteration + '-id-' + finalSelectedImageID).remove();
+        var replacement = true;
+      } else {
+        var replacement = false;
+      }
+
+      finalSelectedImageID = $(this).attr('id').replace(parentIdStub, '');
+
+      var ratinghtml = createUserRatingTable(finalSelectedImageID);
+      if (replacement){
+        $('#final-box>.row').prepend(ratinghtml);
+      } else {
+        $('#final-rating').replaceWith(ratinghtml);
+      }
+      var commentHtml = '<div class="col-6"><div class="form-group mt-3"><label for="user-comments"><b>Please provide comments about your experience using this tool (optional)</b></label><textarea class="form-control" id="user-comments" rows="4"></textarea></div><div class="form-group"><label for="user-details"><b>Name and contact details (optional)</b></label><input type="text" class="form-control" id="user-details" placeholder=""></div><button id="submit-final-feedback" class="btn btn-primary">Submit</button></div>';
+      $('#final-comment').replaceWith(commentHtml);
     }
   });
 
@@ -354,13 +475,14 @@ $(document).ready(function() {
 
       imageLoading = '<div id="image-loading-' + current_id + '" class="image-loading-gif mx-auto text-center">Generating image<img class="img-fluid loading-icon" src="{% static "img/loading.gif" %}" width="50" height="50"/></div>';
 
-      getImage(current_id, JSON.stringify(child));
+      getImage(current_id, JSON.stringify(child), index*DelaySeconds);
 
       attributesDictionary[current_id] = child;
 
       $('#' + iterationIdStub + userIteration + '>.images-div').prepend('<div class="result-bundle col-3" id="' + parentIdStub + current_id + '">' + imageLoading + '<div>' + formatAttributes(child) + '</div></div>');
 
-      $('#image-loading-' + current_id).height = $('.result-bundle').first().width(); /* set the loading height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
+      /* to do: set the loading height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
+
       $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
 
 
@@ -397,8 +519,9 @@ $(document).ready(function() {
 
 
   $('#prompt-results').on('click', '#btn-crossover', function() {
-    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').empty();
-    $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><hr><h3>Iteration ' + userIteration + '</h3></div>');
+   $('.feedback-btn').attr('disabled', true);
+   $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').empty();
+   $('#' + iterationIdStub + userIteration + '>.crossover-instructions-div').append('<div class="col-12 text-center"><hr><h3>Iteration ' + userIteration + '</h3></div>');
     // $('.crossover-instructions-div').empty();
     // $('.continue-or-done-buttons-div').empty();
     $('#btn-crossover').remove();
@@ -407,17 +530,13 @@ $(document).ready(function() {
     addGeneratingAttributesSpinner();
 
     parent1_id = selectedResultList[0];
-    parent2_id = selectedResultList[1];
-
     parent1 = attributesDictionary[parent1_id];
-
     parent1_image = $('#' + parentIdStub + parent1_id + " img").attr('src');
-
     [parent1_feedback, parent1_positives, parent1_negatives, parent1_positive_keys, parent1_negative_keys] = get_feedback_from_id(parent1_id, parent1);
 
+    parent2_id = selectedResultList[1];
     parent2 = attributesDictionary[parent2_id];
     parent2_image = $('#' + parentIdStub + parent2_id + " img").attr('src');
-
     [parent2_feedback, parent2_positives, parent2_negatives, parent2_positive_keys, parent2_negative_keys] = get_feedback_from_id(parent2_id, parent2);
 
     $.ajax({

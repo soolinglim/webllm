@@ -30,7 +30,7 @@ fakemutationllm = False
 # fakeimagepromptllm = True
 fakeimagegen = False
 
-fakellm_delay = 2
+fakellm_delay = 0
 
 client = OpenAI()
 
@@ -193,6 +193,49 @@ def is_unwanted(new_value, unwanted_list):
     return False
 
 
+
+
+def ajax_final_feedback(request):
+    response_data = {}
+
+    try:
+        session = request.POST.get('session')
+        iteration = request.POST.get('iteration')
+
+        user_input = request.POST.get('user_input')
+
+        final_id = request.POST.get('final_id')
+        final_json = request.POST.get('final_json')
+        final_image = request.POST.get('final_image')
+        final_feedback = request.POST.get('final_feedback')
+
+        current_iteration_results = request.POST.get('current_iteration_results')
+
+        comments = request.POST.get('comments')
+        contact = request.POST.get('contact')
+
+        FinalFeedback.objects.create(
+            session=session,
+            iteration=iteration,
+            user_input=user_input,
+            final_id=final_id,
+            final_json=final_json,
+            final_image=final_image,
+            final_feedback=final_feedback,
+            current_iteration_results=current_iteration_results,
+            comments=comments,
+            contact=contact,
+        )
+
+        mail_admins(f"Feedback!", f"user_input: {user_input}\n\nfinal_json: {final_json}\n\nfinal_feedback: {final_feedback}\n\ncomments: {comments}\n\ncontact: {contact}", fail_silently=False, connection=None, html_message=None)
+
+    except Exception as e:
+        # print(e)
+        response_data['status'] = "ERROR"
+        mail_admins(f"Error at {get_current_function_name()}", f"session: {session}\n\nfinal_id: {final_id}\n\nfinal_feedback: {final_feedback}\n\ncomments: {comments}\n\ncontact: {contact}\n\nError: {str(e)}\n\n{str(request.POST)}", fail_silently=False, connection=None, html_message=None)
+
+    return JsonResponse(response_data)
+
 def ajax_crossover(request):
     response_data = {}
 
@@ -234,9 +277,11 @@ def ajax_crossover(request):
             iteration=iteration,
             parent1_id=parent1_id,
             parent1_json=parent1,
+            parent1_image=parent1_image,
             parent1_feedback=parent1_feedback,
             parent2_id=parent2_id,
             parent2_json=parent2,
+            parent2_image=parent2_image,
             parent2_feedback=parent2_feedback,
             current_iteration_results=current_iteration_results,
         )
@@ -643,8 +688,9 @@ def fake_generate_image(prompt):
 
 def generate_image(prompt):
     response = ''
+    
     try:
-        
+            
         start_time = timezone.now() # record the start time
         
         if DALLE_MODEL == "dall-e-2": 
@@ -674,6 +720,7 @@ def generate_image(prompt):
 
     except Exception as e:
         # print(e)
+        print(response)
         mail_admins(f"Error at {get_current_function_name()}", f"Prompt: {prompt}\n\nResponse: {response}\n\nError: {str(e)}", fail_silently=False, connection=None, html_message=None)
 
 
@@ -706,8 +753,11 @@ def ajax_get_image(request):
         instance = request.POST.get('instance')
         user_input = request.POST.get('user_input')
         attributes = request.POST.get('attributes')
+        delay = int(request.POST.get('delay'))
 
         prompt = convert_attributes_to_dalle_prompt(user_input, attributes)
+
+        time.sleep(delay)
 
         if fakeimagegen:
             dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = fake_generate_image(prompt)
@@ -739,11 +789,11 @@ def ajax_get_image(request):
 
         else:
             response_data['status'] = "ERROR"
-            mail_admins(f"Error at {get_current_function_name()}", f"Prompt: {prompt}\n\nCan't get image: {dalle_image_url}\n\nError: {str(response.status_code)}", fail_silently=False, connection=None, html_message=None)
+            mail_admins(f"Error at {get_current_function_name()}", f"Session: {session}\n\nIteration: {iteration}\n\nInstance: {instance}\n\nUser input: {user_input}\n\nAttributes: {attributes}\n\nPrompt: {prompt}\n\nCan't get image: {dalle_image_url}\n\nError: {str(response.status_code)}", fail_silently=False, connection=None, html_message=None)
 
     except Exception as e:
         response_data['status'] = "ERROR"
-        mail_admins(f"Error at {get_current_function_name()}", f"Prompt: {prompt}\n\nError: {str(e)}", fail_silently=False, connection=None, html_message=None)
+        mail_admins(f"Error at {get_current_function_name()}", f"Session: {session}\n\nIteration: {iteration}\n\nInstance: {instance}\n\nUser input: {user_input}\n\nAttributes: {attributes}\n\nPrompt: {prompt}\n\nError: {str(e)}", fail_silently=False, connection=None, html_message=None)
 
     return JsonResponse(response_data)
 
