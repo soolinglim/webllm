@@ -36,26 +36,24 @@
 
 
 {% block content %}
-{% for run in runs %}
-<h4 class="mb-3">{{ run.user_input }} <small><a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></h4>
-<div class="row mb-5">
-  <div class="col-sm-3">
-    <img src={{ run.images.0.image.url }} class="img-fluid">
-  </div>
-  <div class="col-sm-3">
-    <img src={{ run.images.1.image.url }} class="img-fluid">
-  </div>
-  <div class="col-sm-3">
-    <img src={{ run.images.2.image.url }} class="img-fluid">
-  </div>
-  <div class="col-sm-3">
-    <img src={{ run.images.3.image.url }} class="img-fluid">
-  </div>
+  {% for run in runs %}
+  <h4 class="mb-3">{{ run.user_input }} <small><a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></h4>
+  <div class="row pb-5">
+    <div class="col-sm-3">
+      <img src={{ run.images.0.image.url }} class="img-fluid">
+    </div>
+    <div class="col-sm-3">
+      <img src={{ run.images.1.image.url }} class="img-fluid">
+    </div>
+    <div class="col-sm-3">
+      <img src={{ run.images.2.image.url }} class="img-fluid">
+    </div>
+    <div class="col-sm-3">
+      <img src={{ run.images.3.image.url }} class="img-fluid">
+    </div>
 
-</div>
-
-{% endfor %}
-
+  </div>
+  {% endfor %}
 {% comment %}
 <table class="table table-sm table-bordered">
   <tr>
