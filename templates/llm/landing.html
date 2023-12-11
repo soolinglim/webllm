@@ -118,8 +118,9 @@ body {
   <div class="col-xl-5 d-flex flex-column align-items-center">
     <div class="form-group text-center my-auto">
       {% csrf_token %}
-      <img src="{% static 'img/logo/logo.png' %}" height="80" class="mb-5" alt=""/>
-      <h3 class="mb-5">Start with a few words describing your architectural concept</h3>
+      <img src="{% static 'img/logo/logo.png' %}" height="80" class="mb-4" alt=""/>
+      <p class="text-muted mt-2 pb-5">SCAPE helps you explore novel ideas in conceptual architecture<br>while improving aspects that matter to you.</p>
+      <h4 class="pt-2 pb-4">Start with a few words describing your architectural concept</h4>
 
       <div class="input-group mb-3">
         <input type="text" id="user-input" class="form-control" placeholder="A seashell inspired building" required maxlength="300" autofocus>
