@@ -753,11 +753,8 @@ def ajax_get_image(request):
         instance = request.POST.get('instance')
         user_input = request.POST.get('user_input')
         attributes = request.POST.get('attributes')
-        delay = int(request.POST.get('delay'))
 
         prompt = convert_attributes_to_dalle_prompt(user_input, attributes)
-
-        time.sleep(delay)
 
         if fakeimagegen:
             dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = fake_generate_image(prompt)

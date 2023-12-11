@@ -314,137 +314,141 @@ $(document).ready(function() {
     });
   }
 
-  function getImage(current_id, attributes, delay){
-    $.ajax({
-      type: 'POST',
-      data : {
-        'session': userSession,
-        'iteration': userIteration,
-        'instance': current_id,
-        'user_input': userInput,
-        'attributes': attributes,
-        'delay': delay,
-      },
-      url: "{% url 'ajax_get_image' %}",
-      complete: function(jqXHR, textStatus) {
-        if (textStatus == 'success') {
-          $("#image-loading-" + current_id).remove();
-          if (jqXHR.responseJSON.status == 'OK'){
-
-            $('#' + parentIdStub + current_id).prepend('<img src="' + jqXHR.responseJSON.result + '" class="img-fluid"/><button type="button" class="btn btn-secondary btn-modal"><i class="fas fa-search-plus"></i></button>');
-
-            $('#' + parentIdStub + current_id).append('<div>' + jqXHR.responseJSON.revised_prompt + '</div>');
-
-            if ($('#btn-continue').length <= 0){
-              $('#' + iterationIdStub + userIteration + '>.continue-or-done-buttons-div').append('<div class="col-12 mb-2 text-center"><button id="btn-continue" type="button" class="btn btn-primary btn-lg">Improve these images</button><button id="btn-finish" type="button" class="btn btn-success btn-lg">I\'m done!</button></div>');
-
-              $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
-            }
-
-            currentIterationResults[current_id]["image_url"] = jqXHR.responseJSON.result;
-            currentIterationResults[current_id]["prompt"] = jqXHR.responseJSON.prompt;
-            currentIterationResults[current_id]["revised_prompt"] = jqXHR.responseJSON.revised_prompt;
-          } else {
-
-            $('#' + parentIdStub + current_id).prepend(dalleImageErrorHtml);
-
-            /* to do set the error height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
-
-          }
-        } 
-      }
-    });
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  async function getImage(current_id, attributes, delay){
+   await sleep(delay*1000); 
+   $.ajax({
+    type: 'POST',
+    data : {
+      'session': userSession,
+      'iteration': userIteration,
+      'instance': current_id,
+      'user_input': userInput,
+      'attributes': attributes,
+    },
+    url: "{% url 'ajax_get_image' %}",
+    complete: function(jqXHR, textStatus) {
+      if (textStatus == 'success') {
+        $("#image-loading-" + current_id).remove();
+        if (jqXHR.responseJSON.status == 'OK'){
 
+          $('#' + parentIdStub + current_id).prepend('<img src="' + jqXHR.responseJSON.result + '" class="img-fluid"/><button type="button" class="btn btn-secondary btn-modal"><i class="fas fa-search-plus"></i></button>');
 
-  $('#prompt-results').on('click', '.result-bundle', function() {
-    if (canSelectImage){
-      $(this).addClass('result-selected');
+          $('#' + parentIdStub + current_id).append('<div>' + jqXHR.responseJSON.revised_prompt + '</div>');
 
-      currentSelectedItemID = $(this).attr('id').replace(parentIdStub, '');
+          if ($('#btn-continue').length <= 0){
+            $('#' + iterationIdStub + userIteration + '>.continue-or-done-buttons-div').append('<div class="col-12 mb-2 text-center"><button id="btn-continue" type="button" class="btn btn-primary btn-lg">Improve these images</button><button id="btn-finish" type="button" class="btn btn-success btn-lg">I\'m done!</button></div>');
 
-      /* only add it if it is not already in the list */
-      if ($.inArray(currentSelectedItemID, selectedResultList) == -1) {
-        selectedResultList.push(currentSelectedItemID);
+            $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
+          }
 
-        while (selectedResultList.length > 2) {
-          first_item = selectedResultList.shift();
-          $('#' + parentIdStub + first_item).removeClass('result-selected');
-          $('#feedback-iteration-' + userIteration + '-id-' + first_item).remove();
-        }
-        /* get the attributes of the selected item */
-        var ratinghtml = createUserRatingTable(currentSelectedItemID);
-
-        if ($('.temporary-parents').length == 2){
-          $('#temp-1').replaceWith(ratinghtml);
-          $('.temporary-parents').height($('#' + iterationIdStub + userIteration + ' > .parents-div').height());
-        } else if ($('.temporary-parents').length == 1){
-          $('#temp-2').replaceWith(ratinghtml);
+          currentIterationResults[current_id]["image_url"] = jqXHR.responseJSON.result;
+          currentIterationResults[current_id]["prompt"] = jqXHR.responseJSON.prompt;
+          currentIterationResults[current_id]["revised_prompt"] = jqXHR.responseJSON.revised_prompt;
         } else {
-          $('#' + iterationIdStub + userIteration + '>.parents-div').append(ratinghtml);
+
+          $('#' + parentIdStub + current_id).prepend(dalleImageErrorHtml);
+
+          /* to do set the error height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
+
         }
-      }
-
-      if (selectedResultList.length == 2){
-        $('#btn-crossover').attr('disabled', false);
-      }
-    } else if (canSelectFinalImage){
-      $('.result-selected').removeClass('result-selected');
-      $(this).addClass('result-selected');
-
-      if (finalSelectedImageID){
-        $('#feedback-iteration-' + userIteration + '-id-' + finalSelectedImageID).remove();
-        var replacement = true;
-      } else {
-        var replacement = false;
-      }
-
-      finalSelectedImageID = $(this).attr('id').replace(parentIdStub, '');
-
-      var ratinghtml = createUserRatingTable(finalSelectedImageID);
-      if (replacement){
-        $('#final-box>.row').prepend(ratinghtml);
-      } else {
-        $('#final-rating').replaceWith(ratinghtml);
-      }
-      var commentHtml = '<div class="col-6"><div class="form-group mt-3"><label for="user-comments"><b>Please provide comments about your experience using this tool (optional)</b></label><textarea class="form-control" id="user-comments" rows="4"></textarea></div><div class="form-group"><label for="user-details"><b>Name and contact details (optional)</b></label><input type="text" class="form-control" id="user-details" placeholder=""></div><button id="submit-final-feedback" class="btn btn-primary">Submit</button></div>';
-      $('#final-comment').replaceWith(commentHtml);
+      } 
     }
   });
+ }
 
 
-  function get_feedback_from_id(parent_id, parent){
-    feedback_list = $('#' + 'feedback-iteration-' + userIteration + '-id-' + parent_id).find('.user-feedback-attribute');
-    parent_feedback = {}
-    parent_positives = {}
-    parent_negatives = {}
-    parent_positive_keys = []
-    parent_negative_keys = []
-    $.each( feedback_list , function(){
-      key = $(this).find('td:first-child').attr("class");
-      key = key.replace("feedback-", "");
-      key = key.replace("-", " ");
-      if ($(this).find('.btn-good').hasClass('btn-clicked')){
-        parent_feedback[key] = 1;
-        parent_positives[key] = parent[key];
-        parent_positive_keys.push(key);
-      } else if ($(this).find('.btn-bad').hasClass('btn-clicked')){
-        parent_feedback[key] = -1;
-        /* find out the value to add to the avoid list */
-        if ($.inArray(parent[key], avoidAttributeValues[key]) == -1) { /* only add if it is not already there */
-          avoidAttributeValues[key].push(parent[key]); 
-        }
-        parent_negatives[key] = parent[key];
-        parent_negative_keys.push(key);
-      } else {
-        parent_feedback[key] = 0;
+
+ $('#prompt-results').on('click', '.result-bundle', function() {
+  if (canSelectImage){
+    $(this).addClass('result-selected');
+
+    currentSelectedItemID = $(this).attr('id').replace(parentIdStub, '');
+
+    /* only add it if it is not already in the list */
+    if ($.inArray(currentSelectedItemID, selectedResultList) == -1) {
+      selectedResultList.push(currentSelectedItemID);
+
+      while (selectedResultList.length > 2) {
+        first_item = selectedResultList.shift();
+        $('#' + parentIdStub + first_item).removeClass('result-selected');
+        $('#feedback-iteration-' + userIteration + '-id-' + first_item).remove();
       }
-    })
-    return [parent_feedback, parent_positives, parent_negatives, parent_positive_keys, parent_negative_keys];
-  }
+      /* get the attributes of the selected item */
+      var ratinghtml = createUserRatingTable(currentSelectedItemID);
 
-  function scrollToTop(){
+      if ($('.temporary-parents').length == 2){
+        $('#temp-1').replaceWith(ratinghtml);
+        $('.temporary-parents').height($('#' + iterationIdStub + userIteration + ' > .parents-div').height());
+      } else if ($('.temporary-parents').length == 1){
+        $('#temp-2').replaceWith(ratinghtml);
+      } else {
+        $('#' + iterationIdStub + userIteration + '>.parents-div').append(ratinghtml);
+      }
+    }
+
+    if (selectedResultList.length == 2){
+      $('#btn-crossover').attr('disabled', false);
+    }
+  } else if (canSelectFinalImage){
+    $('.result-selected').removeClass('result-selected');
+    $(this).addClass('result-selected');
+
+    if (finalSelectedImageID){
+      $('#feedback-iteration-' + userIteration + '-id-' + finalSelectedImageID).remove();
+      var replacement = true;
+    } else {
+      var replacement = false;
+    }
+
+    finalSelectedImageID = $(this).attr('id').replace(parentIdStub, '');
+
+    var ratinghtml = createUserRatingTable(finalSelectedImageID);
+    if (replacement){
+      $('#final-box>.row').prepend(ratinghtml);
+    } else {
+      $('#final-rating').replaceWith(ratinghtml);
+    }
+    var commentHtml = '<div class="col-6"><div class="form-group mt-3"><label for="user-comments"><b>Please provide comments about your experience using this tool (optional)</b></label><textarea class="form-control" id="user-comments" rows="4"></textarea></div><div class="form-group"><label for="user-details"><b>Name and contact details (optional)</b></label><input type="text" class="form-control" id="user-details" placeholder=""></div><button id="submit-final-feedback" class="btn btn-primary">Submit</button></div>';
+    $('#final-comment').replaceWith(commentHtml);
+  }
+});
+
+
+ function get_feedback_from_id(parent_id, parent){
+  feedback_list = $('#' + 'feedback-iteration-' + userIteration + '-id-' + parent_id).find('.user-feedback-attribute');
+  parent_feedback = {}
+  parent_positives = {}
+  parent_negatives = {}
+  parent_positive_keys = []
+  parent_negative_keys = []
+  $.each( feedback_list , function(){
+    key = $(this).find('td:first-child').attr("class");
+    key = key.replace("feedback-", "");
+    key = key.replace("-", " ");
+    if ($(this).find('.btn-good').hasClass('btn-clicked')){
+      parent_feedback[key] = 1;
+      parent_positives[key] = parent[key];
+      parent_positive_keys.push(key);
+    } else if ($(this).find('.btn-bad').hasClass('btn-clicked')){
+      parent_feedback[key] = -1;
+      /* find out the value to add to the avoid list */
+      if ($.inArray(parent[key], avoidAttributeValues[key]) == -1) { /* only add if it is not already there */
+        avoidAttributeValues[key].push(parent[key]); 
+      }
+      parent_negatives[key] = parent[key];
+      parent_negative_keys.push(key);
+    } else {
+      parent_feedback[key] = 0;
+    }
+  })
+  return [parent_feedback, parent_positives, parent_negatives, parent_positive_keys, parent_negative_keys];
+}
+
+function scrollToTop(){
     // var n = $(document).height();
     $('html, body').animate({scrollTop: 0}, ScrollTopSpeed);
   }
