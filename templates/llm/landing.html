@@ -139,6 +139,7 @@
 {% block scripts %}
 <script type="text/javascript" src="{% static "js/csrf.min.js" %}"></script>
 <script>
+var userInput = "";
 var ScrollTopSpeed = 1000;
 var selectedResultList = [];
 var userSession = "";
@@ -162,7 +163,7 @@ var avoidAttributeValues = {
 
 $(document).ready(function() {
 
-  $('#user-input').on('keyup', function(e) {
+  $('#user-input').on('input paste keyup', function(e) {
     var textarea_value = $("#user-input").val();
 
     if (textarea_value.length >= 4) { /* if(textarea_value != '') { */
@@ -174,7 +175,7 @@ $(document).ready(function() {
   });
 
 
-  $('#user-input').on('keydown', function(e) {
+  $('#user-input').on('input paste keydown', function(e) {
     if ((e.which === 13) && !$('#btn-submit').prop('disabled')) {
       $("#btn-submit").click();
     }
@@ -218,7 +219,7 @@ $(document).ready(function() {
     });
   }
 
-  function getImage(current_id, userInput, attributes){
+  function getImage(current_id, attributes){
     $.ajax({
       type: 'POST',
       data : {
@@ -353,7 +354,7 @@ $(document).ready(function() {
 
       imageLoading = '<div id="image-loading-' + current_id + '" class="image-loading-gif mx-auto text-center">Generating image<img class="img-fluid loading-icon" src="{% static "img/loading.gif" %}" width="50" height="50"/></div>';
 
-      getImage(current_id, userInput, JSON.stringify(child));
+      getImage(current_id, JSON.stringify(child));
 
       attributesDictionary[current_id] = child;
 
@@ -440,7 +441,7 @@ $(document).ready(function() {
         'parent2_negatives': JSON.stringify(parent2_negatives),
         'parent2_positive_keys': JSON.stringify(parent2_positive_keys),
         'parent2_negative_keys': JSON.stringify(parent2_negative_keys),
-        'user_input': $('#user-input').val(),
+        'user_input': userInput,
         'avoid_values': JSON.stringify(avoidAttributeValues),
         'current_iteration_results': JSON.stringify(currentIterationResults),
       },
