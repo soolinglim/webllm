@@ -173,7 +173,7 @@ var attributesDictionary = {};
 var canSelectImage = false;
 var canSelectFinalImage = false;
 var DelaySeconds = 10;
-var MinDalle3Seconds = 10; 
+var AverageDalle3Seconds = 14; 
 
 var finalSelectedImageID = "";
 
@@ -318,7 +318,7 @@ $(document).ready(function() {
   }
 
   async function showCrossoverButton(){
-   await sleep((3*DelaySeconds + MinDalle3Seconds)*1000); 
+   await sleep((3*DelaySeconds + AverageDalle3Seconds)*1000); 
     $('#' + iterationIdStub + userIteration + '>.continue-or-done-buttons-div').append('<div class="col-12 mb-2 text-center"><button id="btn-continue" type="button" class="btn btn-primary btn-lg">Improve these images</button><button id="btn-finish" type="button" class="btn btn-success btn-lg">I\'m done!</button></div>');
 
     $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
