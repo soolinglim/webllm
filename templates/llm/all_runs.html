@@ -36,49 +36,100 @@
 
 
 {% block content %}
-  {% for run in runs %}
-  <h4 class="mb-3">{{ run.user_input }} <small><a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></h4>
-  <div class="row pb-5">
-    <div class="col-sm-3">
-      <img src={{ run.images.0.image.url }} class="img-fluid">
-    </div>
-    <div class="col-sm-3">
-      <img src={{ run.images.1.image.url }} class="img-fluid">
-    </div>
-    <div class="col-sm-3">
-      <img src={{ run.images.2.image.url }} class="img-fluid">
-    </div>
-    <div class="col-sm-3">
-      <img src={{ run.images.3.image.url }} class="img-fluid">
-    </div>
+<!-- Add pagination controls -->
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    {% comment %}
+    <li class="page-item {% if not runs.has_previous %}disabled{% endif %}">
+      <a class="page-link" href="?page=1" {% if not runs.has_previous %}tabindex="-1" aria-disabled="true"{% endif %}>&laquo; first</a>
+    </li>
+    {% endcomment %}
+    <li class="page-item {% if not runs.has_previous %}disabled{% endif %}">
+      {% if runs.has_previous %}
+      <a class="page-link" href="?page={{ runs.previous_page_number }}">previous</a>
+      {% else %}
+      <span class="page-link" tabindex="-1" aria-disabled="true">previous</span>
+      {% endif %}
+    </li>
 
+    {% for i in runs.paginator.page_range %}
+    <li class="page-item {% if i == runs.number %}active{% endif %}">
+      <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+    </li>
+    {% endfor %}
+
+    <li class="page-item {% if not runs.has_next %}disabled{% endif %}">
+      {% if runs.has_next %}
+      <a class="page-link" href="?page={{ runs.next_page_number }}">next</a>
+      {% else %}
+      <span class="page-link" tabindex="-1" aria-disabled="true">next</span>
+      {% endif %}
+    </li>
+    {% comment %}
+    <li class="page-item {% if not runs.has_next %}disabled{% endif %}">
+      <a class="page-link" href="?page={{ runs.paginator.num_pages }}" {% if not runs.has_next %}tabindex="-1" aria-disabled="true"{% endif %}>last &raquo;</a>
+    </li>
+    {% endcomment %}
+  </ul>
+</nav>
+
+
+
+{% for run in runs %}
+<h4 class="mb-3">{{ run.user_input }} <small><a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></h4>
+<div class="row pb-5">
+  <div class="col-sm-3">
+    <img src={{ run.images.0.image.url }} class="img-fluid">
   </div>
-  {% endfor %}
-{% comment %}
-<table class="table table-sm table-bordered">
-  <tr>
-    <td>Timestamp</td>
-    <td>User input</td>
-    <td>Final images</td>
-  </tr>
-  {% for run in runs %}
-  <tr>
-    <td>{{ run.timestamp }}</td>
-    <td>{{ run.user_input }} <a href="{% url 'llm_history' uuid_param=run.session %}">[View details]</a></td>
-    <td>
-      <img src={{ run.images.0.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
-      <img src={{ run.images.1.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
-      <img src={{ run.images.2.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
-      <img src={{ run.images.3.image.url }} class="img-small img-thumbnail dalle-image img-fluid">
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+  <div class="col-sm-3">
+    <img src={{ run.images.1.image.url }} class="img-fluid">
+  </div>
+  <div class="col-sm-3">
+    <img src={{ run.images.2.image.url }} class="img-fluid">
+  </div>
+  <div class="col-sm-3">
+    <img src={{ run.images.3.image.url }} class="img-fluid">
+  </div>
 
-<h1>{{user_input.user_input}}</h1>
-{% endcomment %}
+</div>
+{% endfor %}
 
+<!-- Add pagination controls -->
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    {% comment %}
+    <li class="page-item {% if not runs.has_previous %}disabled{% endif %}">
+      <a class="page-link" href="?page=1" {% if not runs.has_previous %}tabindex="-1" aria-disabled="true"{% endif %}>&laquo; first</a>
+    </li>
+    {% endcomment %}
+    <li class="page-item {% if not runs.has_previous %}disabled{% endif %}">
+      {% if runs.has_previous %}
+      <a class="page-link" href="?page={{ runs.previous_page_number }}">previous</a>
+      {% else %}
+      <span class="page-link" tabindex="-1" aria-disabled="true">previous</span>
+      {% endif %}
+    </li>
 
+    {% for i in runs.paginator.page_range %}
+    <li class="page-item {% if i == runs.number %}active{% endif %}">
+      <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+    </li>
+    {% endfor %}
+
+    <li class="page-item {% if not runs.has_next %}disabled{% endif %}">
+      {% if runs.has_next %}
+      <a class="page-link" href="?page={{ runs.next_page_number }}">next</a>
+      {% else %}
+      <span class="page-link" tabindex="-1" aria-disabled="true">next</span>
+      {% endif %}
+    </li>
+    {% comment %}
+    <li class="page-item {% if not runs.has_next %}disabled{% endif %}">
+      <a class="page-link" href="?page={{ runs.paginator.num_pages }}" {% if not runs.has_next %}tabindex="-1" aria-disabled="true"{% endif %}>last &raquo;</a>
+    </li>
+    {% endcomment %}
+  </ul>
+</nav>
 
 {% endblock content %}
 

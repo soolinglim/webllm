@@ -7,6 +7,8 @@ import inspect
 import time, random
 from urllib.parse import urlparse
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 import openai
 from openai import OpenAI
@@ -29,6 +31,7 @@ fakemutationllm = True
 fakeimagegen = True
 # fakeimagepromptllm = True
 
+MAX_RUNS_PER_PAGE = 5
 
 if settings.DEBUG == False:
     fakeuserinputllm = False
@@ -44,13 +47,47 @@ client = OpenAI()
 keyword_examples = ['architectural style', 'site', 'colors', 'lighting', 'shape/form', 'materials']
 
 
+# def get_all_runs(request):
+#     real_runs = UserInput.objects.exclude(response="fake").exclude(response="").filter(version=1).exclude(hide=True).order_by('-timestamp')
+#     for run in real_runs:
+#         images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1] # get the final 4 instance, sorted in the right order
+#         run.images = images
+#     return render(request, 'llm/all_runs.html', {
+#     'runs': real_runs,
+#     })
+
 def get_all_runs(request):
+    page = request.GET.get('page', 1)  # Get the current page number from the request parameters
+
+    try:
+        page = int(page)
+        if page < 1:
+            # Redirect to the first page if the page number is less than 1
+            return redirect('llm_all_runs')
+    except ValueError:
+        # Redirect to the first page if the page parameter is not a valid integer
+        return redirect('llm_all_runs')
+
+
     real_runs = UserInput.objects.exclude(response="fake").exclude(response="").filter(version=1).exclude(hide=True).order_by('-timestamp')
+
+    # Paginate the queryset
+    paginator = Paginator(real_runs, MAX_RUNS_PER_PAGE)  # Show 10 runs per page
+    try:
+        real_runs = paginator.page(page)
+    except PageNotAnInteger:
+        # If the page parameter is not an integer, show the first page
+        real_runs = paginator.page(1)
+    except EmptyPage:
+        # If the page parameter is out of range, show the last page
+        real_runs = paginator.page(paginator.num_pages)
+
     for run in real_runs:
-        images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1] # get the final 4 instance, sorted in the right order
+        images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1]
         run.images = images
+
     return render(request, 'llm/all_runs.html', {
-    'runs': real_runs,
+        'runs': real_runs,
     })
 
 
