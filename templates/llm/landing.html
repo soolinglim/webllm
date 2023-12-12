@@ -174,7 +174,6 @@ var attributesDictionary = {};
 var canSelectImage = false;
 var canSelectFinalImage = false;
 var DelaySeconds = 10;
-var AverageDalle3Seconds = 14; 
 
 var finalSelectedImageID = "";
 
@@ -319,7 +318,7 @@ $(document).ready(function() {
   }
 
   async function showCrossoverButton(){
-   await sleep((3*DelaySeconds + AverageDalle3Seconds)*1000); 
+
     $('#' + iterationIdStub + userIteration + '>.continue-or-done-buttons-div').append('<div class="col-12 mb-2 text-center"><button id="btn-continue" type="button" class="btn btn-primary btn-lg">Improve these images</button><button id="btn-finish" type="button" class="btn btn-success btn-lg">I\'m done!</button></div>');
 
     $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
@@ -356,6 +355,12 @@ $(document).ready(function() {
           /* to do set the error height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
 
         }
+
+        /* if all image-loading is gone, show crossover button */
+        if ($('.image-loading-gif').length == 0){
+          showCrossoverButton();
+        }
+
       } 
     }
   });
@@ -475,7 +480,7 @@ function scrollToTop(){
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
 
-    showCrossoverButton();
+    // showCrossoverButton();
 
     childList.forEach(function (child, index) {
       current_id = userIteration.toString() + '-' + index.toString();
