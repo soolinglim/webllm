@@ -5,9 +5,9 @@
 {% block extended_style %}
 <style>
 body {
-  min-width: 1400px;
+/*  min-width: 1400px;
   width: auto !important;
-  width: 1400px;
+  width: 1400px;*/
 }
 .thank-you-div {
   padding-top: 150px;
@@ -614,6 +614,10 @@ function scrollToTop(){
     userInput = $('#user-input').val();
 
     addGeneratingAttributesSpinner();
+
+    $("body").css("min-width", "1400px");
+    $("body").css("width", "auto !important");
+    $("body").css("width", "1400px");
 
     $('#user-input').attr('disabled', true);
     $('#btn-submit').attr('disabled', true);
