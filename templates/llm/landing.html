@@ -61,6 +61,10 @@ body {
   padding-top: 100px;
   color: gray;
 }
+.retry-image-generation {
+  margin-top: 100px;
+  margin-bottom: 135px;
+}
 .loading-icon-main {
   padding-top: 20px;
   margin-left: auto;
@@ -179,6 +183,8 @@ var canSelectFinalImage = false;
 var DelaySeconds = 10;
 
 var finalSelectedImageID = "";
+
+var imageLoadingBlurb = 'Generating image<img class="img-fluid loading-icon" src="{% static "img/loading.gif" %}" width="50" height="50"/>';
 
 var backendErrorHtml = '<div class="backend-error text-center"><p>There has been an error.</p><p>Please try again later.</p></div>'
 var dalleImageErrorHtml = '<div class="image-error text-center"><p>Unable to generate image: DALL·E 3 error</p><p>Please try again later.</p></div>'
@@ -329,6 +335,7 @@ $(document).ready(function() {
 
   async function getImage(current_id, attributes, delay){
    await sleep(delay*1000); 
+   checkImageSpinnerStillThere(current_id);
    $.ajax({
     type: 'POST',
     data : {
@@ -476,6 +483,15 @@ function scrollToTop(){
     return newhtml;
   }
 
+
+  $('#prompt-results').on('click', '.retry-image-generation', function() {
+    var current_id = $(this).parent().attr('id').replace('image-loading-', '');
+    $('#image-loading-' + current_id).empty();
+    $('#image-loading-' + current_id).append(imageLoadingBlurb);
+    getImage(current_id, attributesDictionary[current_id], 0);
+  });
+
+
   function addImagesToPanel(childList){
 
     var old_height = $(document).height(); /* store document height before modifications */
@@ -492,7 +508,7 @@ function scrollToTop(){
     childList.forEach(function (child, index) {
       current_id = userIteration.toString() + '-' + index.toString();
 
-      imageLoading = '<div id="image-loading-' + current_id + '" class="image-loading-gif mx-auto text-center">Generating image<img class="img-fluid loading-icon" src="{% static "img/loading.gif" %}" width="50" height="50"/></div>';
+      imageLoading = '<div id="image-loading-' + current_id + '" class="image-loading-gif mx-auto text-center">' + imageLoadingBlurb + '</div>';
 
       getImage(current_id, JSON.stringify(child), index*DelaySeconds);
 
@@ -530,6 +546,16 @@ function scrollToTop(){
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
 
     scrollToTop();
+  }
+
+
+  async function checkImageSpinnerStillThere(current_id){
+    var waitTimeSeconds = 30;
+    await sleep(waitTimeSeconds * 1000);
+    if ($('#image-loading-' + current_id).length > 0){
+      $('#image-loading-' + current_id).empty();
+      $('#image-loading-' + current_id).append('<button class="btn btn-primary retry-image-generation">Try again</button>');
+    }
   }
 
 
