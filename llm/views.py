@@ -25,10 +25,10 @@ NUM_CHILDREN = 4
 CHATGPT_MODEL = "gpt-4-1106-preview" # "gpt-3.5-turbo" #
 DALLE_MODEL = "dall-e-3" # "dall-e-2" # 
 
-fakeuserinputllm = False
-fakecrossoverllm = False
-fakemutationllm = False
-fakeimagegen = False
+fakeuserinputllm = True
+fakecrossoverllm = True
+fakemutationllm = True
+fakeimagegen = True
 # fakeimagepromptllm = True
 
 MAX_RUNS_PER_PAGE = 5
@@ -477,7 +477,7 @@ def ajax_crossover(request):
 def get_current_function_name():
     return inspect.currentframe().f_back.f_code.co_name
 
-def run_llm(prompt, temperature=0.9):
+def run_llm(prompt, temperature=0.9, email=False):
     messages = [
     {'role': 'user', 'content': prompt}
     ]
@@ -489,6 +489,9 @@ def run_llm(prompt, temperature=0.9):
         messages=messages,
         temperature=temperature,
     )
+
+    if email:
+        mail_admins(f"Run llm", f"Prompt: {prompt}\n\nResponse: {completion}", fail_silently=False, connection=None, html_message=None)
 
     end_time = timezone.now() # record the end time
 
@@ -844,6 +847,9 @@ def ajax_process_user_input(request):
 
     try:
         user_input = request.POST.get('user_input')
+
+        mail_admins(f"New usage", f"User input: {user_input}", fail_silently=False, connection=None, html_message=None)
+
         iteration = request.POST.get('iteration')
 
         session = uuid.uuid4()
@@ -862,7 +868,7 @@ def ajax_process_user_input(request):
         if fakeuserinputllm:
             completion, result, start_time, end_time, elapsed_time = run_fake_process_user_input_llm(prompt)
         else:
-            completion, result, start_time, end_time, elapsed_time = run_llm(prompt)
+            completion, result, start_time, end_time, elapsed_time = run_llm(prompt=prompt, email=True)
 
         UserInput.objects.create(
             session=session,

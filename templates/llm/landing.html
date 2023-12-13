@@ -600,7 +600,8 @@ function scrollToTop(){
             $('.result-bundle').removeClass('result-selected');
             addImagesToPanel(jqXHR.responseJSON.children_list);
           } else {
-            $('#prompt-results').prepend(backendErrorHtml);
+            $('#attributes-loading-gif').empty();
+            $('#attributes-loading-gif').append(backendErrorHtml);
           }
         } 
       }
@@ -645,7 +646,8 @@ function scrollToTop(){
             userSession = jqXHR.responseJSON.session;
             addImagesToPanel(jqXHR.responseJSON.result);
           } else {
-            $('#prompt-results').prepend(backendErrorHtml);
+            $('#attributes-loading-gif').empty();
+            $('#attributes-loading-gif').append(backendErrorHtml);
           }
         }
       }
