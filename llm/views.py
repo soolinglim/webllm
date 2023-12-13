@@ -25,10 +25,10 @@ NUM_CHILDREN = 4
 CHATGPT_MODEL = "gpt-4-1106-preview" # "gpt-3.5-turbo" #
 DALLE_MODEL = "dall-e-3" # "dall-e-2" # 
 
-fakeuserinputllm = True
-fakecrossoverllm = True
-fakemutationllm = True
-fakeimagegen = True
+fakeuserinputllm = False
+fakecrossoverllm = False
+fakemutationllm = False
+fakeimagegen = False
 # fakeimagepromptllm = True
 
 MAX_RUNS_PER_PAGE = 5

@@ -517,6 +517,7 @@ function scrollToTop(){
 
 
   function addGeneratingAttributesSpinner(){
+    checkSpinnerStillThere();
     var old_height = $(document).height(); /* store document height before modifications */
     var old_scroll = $(window).scrollTop(); /* remember the scroll position */
 
@@ -527,6 +528,15 @@ function scrollToTop(){
     scrollToTop();
   }
 
+
+  async function checkSpinnerStillThere(){
+    var waitTimeSeconds = 30;
+    await sleep(waitTimeSeconds * 1000);
+    if ($('#attributes-loading-gif').length > 0){
+      $('#attributes-loading-gif').empty();
+      $('#attributes-loading-gif').prepend('ChatGPT error, please refresh the page and try again.');
+    }
+  }
 
   function removeGeneratingAttributesSpinner(){
     $('#attributes-loading-gif').remove();
