@@ -284,7 +284,7 @@ $(document).ready(function() {
 
     $('.continue-or-done-buttons-div').empty();
 
-    $('#' + iterationIdStub + userIteration + '>.parents-div').append('<div id="temp-1" class="temporary-parents col-6">Image</div><div id="temp-2" class="temporary-parents col-6">Image</div>');
+    $('#' + iterationIdStub + userIteration + '>.parents-div').append('<div id="temp-1" class="temporary-parents col-6">Image 1</div><div id="temp-2" class="temporary-parents col-6">Image 2</div>');
 
     $('#' + iterationIdStub + userIteration + '>.crossover-btn-div').append('<div class="col-12 mt-2 mb-2 text-center"><button id="btn-crossover" type="submit" class="btn btn-primary btn-lg" disabled>Generate new images from feedback</button></div>');
 
@@ -616,8 +616,6 @@ function scrollToTop(){
     addGeneratingAttributesSpinner();
 
     $("body").css("min-width", "1400px");
-    $("body").css("width", "auto !important");
-    $("body").css("width", "1400px");
 
     $('#user-input').attr('disabled', true);
     $('#btn-submit').attr('disabled', true);
