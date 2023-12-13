@@ -114,7 +114,7 @@ body {
 
 {% block content %}
 
-<div id="prompt-results"></div>
+<div id="prompt-results" class="mb-5"></div>
 
 
 <div class="row justify-content-md-center h-100">
@@ -324,7 +324,7 @@ $(document).ready(function() {
 
     $('#' + iterationIdStub + userIteration + '>.continue-or-done-buttons-div').append('<div class="col-12 mb-2 text-center"><button id="btn-continue" type="button" class="btn btn-primary btn-lg">Improve these images</button><button id="btn-finish" type="button" class="btn btn-success btn-lg">I\'m done!</button></div>');
 
-    $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
+    // $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */
   }
 
   async function getImage(current_id, attributes, delay){
@@ -357,6 +357,10 @@ $(document).ready(function() {
 
           /* to do set the error height to be the same as the image height, which will be the same as the width of the result bundle as it is a square image */
 
+        }
+
+        if ($('.image-loading-gif').length == 3){ /* one image has appeared */
+          $('#' + iterationIdStub + userIteration).removeClass('full-height-div'); /* this is needed so that parents boxes can appear slowly */ /* also this is needed once there is an image, so that the user prompt page does not cover the results  */
         }
 
         /* if all image-loading is gone, show crossover button */
