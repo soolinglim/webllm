@@ -575,7 +575,7 @@ function scrollToTop(){
 
 
   function addGeneratingAttributesSpinner(){
-    checkSpinnerStillThere();
+    checkAttributesSpinnerStillThere();
     var old_height = $(document).height(); /* store document height before modifications */
     var old_scroll = $(window).scrollTop(); /* remember the scroll position */
 
@@ -597,8 +597,8 @@ function scrollToTop(){
   }
 
 
-  async function checkSpinnerStillThere(){
-    var waitTimeSeconds = 30;
+  async function checkAttributesSpinnerStillThere(){
+    var waitTimeSeconds = 45;
     await sleep(waitTimeSeconds * 1000);
     if ($('#attributes-loading-gif').length > 0){
       $('#attributes-loading-gif').empty();
