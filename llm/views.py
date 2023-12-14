@@ -237,6 +237,36 @@ def is_unwanted(new_value, unwanted_list):
     return False
 
 
+def ajax_favourite_image(request):
+    response_data = {}
+
+    try:
+        session = request.POST.get('session')
+        iteration = request.POST.get('iteration')
+        user_input = request.POST.get('user_input')
+            
+        final_id = request.POST.get('final_id')
+        final_json = request.POST.get('final_json')
+        final_image = request.POST.get('final_image')
+
+        FavouriteImage.objects.create(
+            session=session,
+            iteration=iteration,
+            user_input=user_input,
+            final_id=final_id,
+            final_json=final_json,
+            final_image=final_image,
+        )
+
+        mail_admins(f"Favourite image", f"user_input: {user_input}\n\nsession: {session}\n\niteration: {iteration}\n\nimage: {final_image}", fail_silently=False, connection=None, html_message=None)
+
+    except Exception as e:
+        # print(e)
+        response_data['status'] = "ERROR"
+        mail_admins(f"Error at {get_current_function_name()}", f"user_input: {user_input}\n\nsession: {session}\n\nError: {str(e)}\n\n{str(request.POST)}", fail_silently=False, connection=None, html_message=None)
+
+    return JsonResponse(response_data)
+
 
 def ajax_run_complete(request):
     response_data = {}
@@ -306,6 +336,7 @@ def ajax_final_feedback(request):
         mail_admins(f"Error at {get_current_function_name()}", f"session: {session}\n\nfinal_id: {final_id}\n\nfinal_feedback: {final_feedback}\n\ncomments: {comments}\n\ncontact: {contact}\n\nError: {str(e)}\n\n{str(request.POST)}", fail_silently=False, connection=None, html_message=None)
 
     return JsonResponse(response_data)
+
 
 def ajax_crossover(request):
     response_data = {}

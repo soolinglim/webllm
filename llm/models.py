@@ -114,6 +114,16 @@ class RunComplete(models.Model):
     current_iteration_results = models.TextField(blank=True)
 
 
+class FavouriteImage(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    session = models.UUIDField(blank=True, null=True, default=None)
+    user_input = models.TextField(blank=True)
+    iteration = models.IntegerField(blank=True, null=True)
+    final_id = models.CharField(max_length=8, blank=True)
+    final_json = models.TextField(blank=True)
+    final_image = models.URLField(blank=True, null=True)
+
+
 class FinalFeedback(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     session = models.UUIDField(blank=True, null=True, default=None)

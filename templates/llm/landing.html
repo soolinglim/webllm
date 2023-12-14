@@ -395,8 +395,30 @@ $(document).ready(function() {
  }
 
 
+ function recordSelectedImage(){
 
- $('#prompt-results').on('click', '.result-bundle', function() {
+  final = attributesDictionary[finalSelectedImageID];
+
+  final_image = $('#' + parentIdStub + finalSelectedImageID + " img").attr('src');
+
+  $.ajax({
+    type: 'POST',
+    data : {
+      'session': userSession,
+      'user_input': userInput,
+      'iteration': userIteration,
+      'final_id': finalSelectedImageID,
+      'final_json': JSON.stringify(final),
+      'final_image': final_image,
+    },
+    url: "{% url 'ajax_favourite_image' %}",
+    complete: function(jqXHR, textStatus) {
+    }
+  });
+}
+
+
+$('#prompt-results').on('click', '.result-bundle', function() {
   if (canSelectImage){
     $(this).addClass('result-selected');
 
@@ -440,6 +462,8 @@ $(document).ready(function() {
 
     finalSelectedImageID = $(this).attr('id').replace(parentIdStub, '');
 
+    recordSelectedImage();
+
     var ratinghtml = createUserRatingTable(finalSelectedImageID);
     if (replacement){
       $('#final-box>.row').prepend(ratinghtml);
@@ -452,7 +476,7 @@ $(document).ready(function() {
 });
 
 
- function get_feedback_from_id(parent_id, parent){
+function get_feedback_from_id(parent_id, parent){
   feedback_list = $('#' + 'feedback-iteration-' + userIteration + '-id-' + parent_id).find('.user-feedback-attribute');
   parent_feedback = {}
   parent_positives = {}

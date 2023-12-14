@@ -14,5 +14,6 @@ urlpatterns = [
     path('ajax_crossover/', ajax_crossover, name='ajax_crossover'),
     # path('ajax_mail_admin/', ajax_mail_admin, name='ajax_mail_admin'),
     path('ajax_run_complete/', ajax_run_complete, name='ajax_run_complete'),
+    path('ajax_favourite_image/', ajax_favourite_image, name='ajax_favourite_image'),
     path('ajax_final_feedback/', ajax_final_feedback, name='ajax_final_feedback'),
 ]
