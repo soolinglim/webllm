@@ -598,7 +598,7 @@ function scrollToTop(){
 
 
   async function checkAttributesSpinnerStillThere(){
-    var waitTimeSeconds = 45;
+    var waitTimeSeconds = 60;
     await sleep(waitTimeSeconds * 1000);
     if ($('#attributes-loading-gif').length > 0){
       $('#attributes-loading-gif').empty();
