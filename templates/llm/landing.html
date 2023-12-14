@@ -282,6 +282,20 @@ $(document).ready(function() {
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
     scrollToTop();
+
+    $.ajax({
+      type: 'POST',
+      data : {
+        'session': userSession,
+        'user_input': userInput,
+        'iteration': userIteration,
+        'current_iteration_results': JSON.stringify(currentIterationResults),
+      },
+      url: "{% url 'ajax_run_complete' %}",
+      complete: function(jqXHR, textStatus) {
+      }
+    });
+
   });
 
 

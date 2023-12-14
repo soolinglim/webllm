@@ -238,6 +238,33 @@ def is_unwanted(new_value, unwanted_list):
 
 
 
+def ajax_run_complete(request):
+    response_data = {}
+
+    try:
+        session = request.POST.get('session')
+        iteration = request.POST.get('iteration')
+        user_input = request.POST.get('user_input')
+        current_iteration_results = request.POST.get('current_iteration_results')
+
+
+        RunComplete.objects.create(
+            session=session,
+            iteration=iteration,
+            user_input=user_input,
+            current_iteration_results=current_iteration_results,
+        )
+
+        mail_admins(f"Run complete!", f"user_input: {user_input}\n\nsession: {session}\n\niteration: {iteration}", fail_silently=False, connection=None, html_message=None)
+
+    except Exception as e:
+        # print(e)
+        response_data['status'] = "ERROR"
+        mail_admins(f"Error at {get_current_function_name()}", f"user_input: {user_input}\n\nsession: {session}\n\nError: {str(e)}\n\n{str(request.POST)}", fail_silently=False, connection=None, html_message=None)
+
+    return JsonResponse(response_data)
+
+
 
 def ajax_final_feedback(request):
     response_data = {}
@@ -729,7 +756,8 @@ def fake_generate_image(prompt):
     end_time = timezone.now()
 
     elapsed_time = (end_time - start_time).total_seconds()
-    return "fake", "https://images.pexels.com/photos/3172740/pexels-photo-3172740.jpeg", "This is a fake revised prompt", start_time, end_time, elapsed_time
+    revised_prompt = "Imagine a detailed architectural design in the Gothic Revival style located in the historic downtown area of a city reminiscent of London. The construction uses dark stone and limestone material, the details of which shine under the illumination of Gothic lanterns. Stained lead glass work in various colors adds an intricate masterpiece of transparency and reflections. Pointed arches and gables dominate the design's shape and form, integral to the very essence of Gothic architecture. The harmony of these elements forms an elegant edifice that would be the awe of any architecture magazine reader."
+    return "fake", "https://images.pexels.com/photos/3172740/pexels-photo-3172740.jpeg", revised_prompt, start_time, end_time, elapsed_time
     # return "fake", "http://127.0.0.1:8000/media/images/609b5074-ea9a-40b7-957b-bc747d26c1b6.png", "This is a fake revised prompt", start_time, end_time, elapsed_time
 
 

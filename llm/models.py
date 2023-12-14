@@ -106,6 +106,14 @@ class Children(models.Model):
     children_after_mutation = models.TextField(blank=True)
 
 
+class RunComplete(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    session = models.UUIDField(blank=True, null=True, default=None)
+    user_input = models.TextField(blank=True)
+    iteration = models.IntegerField(blank=True, null=True)
+    current_iteration_results = models.TextField(blank=True)
+
+
 class FinalFeedback(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     session = models.UUIDField(blank=True, null=True, default=None)
