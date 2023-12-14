@@ -526,7 +526,7 @@ function scrollToTop(){
     var current_id = $(this).parent().attr('id').replace('image-loading-', '');
     $('#image-loading-' + current_id).empty();
     $('#image-loading-' + current_id).append(imageLoadingBlurb);
-    getImage(current_id, attributesDictionary[current_id], 0);
+    getImage(current_id, JSON.stringify(attributesDictionary[current_id]), 0);
   });
 
 
