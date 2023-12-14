@@ -602,7 +602,7 @@ function scrollToTop(){
     await sleep(waitTimeSeconds * 1000);
     if ($('#attributes-loading-gif').length > 0){
       $('#attributes-loading-gif').empty();
-      $('#attributes-loading-gif').prepend('ChatGPT error, please refresh the page and try again.');
+      $('#attributes-loading-gif').prepend('ChatGPT timeout, please refresh the page and try again.');
     }
   }
 
