@@ -25,10 +25,10 @@ NUM_CHILDREN = 4
 CHATGPT_MODEL = "gpt-4-1106-preview" # "gpt-3.5-turbo" #
 DALLE_MODEL = "dall-e-3" # "dall-e-2" # 
 
-fakeuserinputllm = True
-fakecrossoverllm = True
-fakemutationllm = True
-fakeimagegen = True
+fakeuserinputllm = False
+fakecrossoverllm = False
+fakemutationllm = False
+fakeimagegen = False
 # fakeimagepromptllm = True
 
 MAX_RUNS_PER_PAGE = 5
@@ -210,8 +210,8 @@ def get_history(request, uuid_param):
     #     return HttpResponse('Invalid UUID format')
 
 
-# def is_probability_true(value):
-#     return (random.uniform(0.0, 1.0) <= value) # the higher value, the more likely to return true
+def is_probability_true(value):
+    return (random.uniform(0.0, 1.0) <= value) # the higher value, the more likely to return true
 
 
 def extract_json(input_text):
@@ -228,11 +228,11 @@ def extract_json(input_text):
         return input_text.strip()
 
 
-def is_unwanted(new_value, unwanted_list):
+def is_value_in_list(new_value, exiting_list):
     new_value = new_value.replace(',', ' ').strip()
-    for unwanted in unwanted_list:
-        unwanted = unwanted.strip()
-        if f" {unwanted} " in f" {new_value} " or new_value.startswith(f"{unwanted} ") or new_value.endswith(f" {unwanted}"):
+    for existing_value in exiting_list:
+        existing_value = existing_value.strip()
+        if f" {existing_value} " in f" {new_value} " or new_value.startswith(f"{existing_value} ") or new_value.endswith(f" {existing_value}"):
             return True
     return False
 
@@ -338,6 +338,12 @@ def ajax_final_feedback(request):
     return JsonResponse(response_data)
 
 
+def remove_duplicates_maintaining_order(duplicated_list):
+    res = []
+    [res.append(x) for x in duplicated_list if x not in res]
+    return res
+
+
 def ajax_crossover(request):
     response_data = {}
 
@@ -363,14 +369,18 @@ def ajax_crossover(request):
         parent1_feedback = request.POST.get('parent1_feedback')
         parent1_positives = json.loads(request.POST.get('parent1_positives'))
         parent1_negatives = json.loads(request.POST.get('parent1_negatives'))
+        parent1_unrated = json.loads(request.POST.get('parent1_unrated'))
         parent1_positive_list = json.loads(request.POST.get('parent1_positive_keys'))
         parent1_negative_list = json.loads(request.POST.get('parent1_negative_keys'))
+        parent1_unrated_list = json.loads(request.POST.get('parent1_unrated_keys'))
 
         parent2_feedback = request.POST.get('parent2_feedback')
         parent2_positives = json.loads(request.POST.get('parent2_positives'))
         parent2_negatives = json.loads(request.POST.get('parent2_negatives'))
+        parent2_unrated = json.loads(request.POST.get('parent2_unrated'))
         parent2_positive_list = json.loads(request.POST.get('parent2_positive_keys'))
         parent2_negative_list = json.loads(request.POST.get('parent2_negative_keys'))
+        parent2_unrated_list = json.loads(request.POST.get('parent2_unrated_keys'))
 
         current_iteration_results = request.POST.get('current_iteration_results')
 
@@ -436,7 +446,7 @@ def ajax_crossover(request):
                 # print(f"random choice list: {random_choice_list}")
                 child[key] = random.choice(random_choice_list)
 
-                # to add, if this key value is in the bad list of either parent 1 or parent 2: if the value is the bad one, add it to the mutate list
+                # if this key value is in the bad list of either parent 1 or parent 2: if the value is the bad one, add it to the mutate list
                 if key in parent1_negative_list or key in parent2_negative_list:
                     # print(f"key not liked: {key}")
                     # print(f"Child: {child}")
@@ -447,17 +457,34 @@ def ajax_crossover(request):
                     if key in parent2_negatives:
                         unwanted_values.append(parent2_negatives[key])
                     # if child[key] in unwanted_values:
-                    if is_unwanted(child[key], unwanted_values):
+                    if is_value_in_list(child[key], unwanted_values):
                         # print(f"value not liked {child[key]}")
                         attributes_to_mutate[i].append(key)
+                        print(attributes_to_mutate[i])
                         # mutated = True
+
+                # if it is not rated good either, then there is a 50% chance it will be added to attributes to mutate
+                if key in parent1_unrated_list or key in parent2_unrated_list:
+                    unrated_values = []
+
+                    if key in parent1_unrated:
+                        unrated_values.append(parent1_unrated[key])
+                    if key in parent2_unrated:
+                        unrated_values.append(parent2_unrated[key])
+                    # if child[key] in unrated_values:
+                    if is_value_in_list(child[key], unrated_values):
+                        # print(f"value not rated {child[key]}")
+                        if is_probability_true(0.5):
+                            attributes_to_mutate[i].append(key)
 
             children_list.append(child)
 
-            # if not mutated:
             if not fakecrossoverllm:
                 attribute_to_randomise = random.choice(keyword_examples)
                 attributes_to_mutate[i].append(attribute_to_randomise)
+
+            # remove duplicates from attributes to mutate list
+            attributes_to_mutate[i] = remove_duplicates_maintaining_order(attributes_to_mutate[i])
 
         Children.objects.create(
             session=session,
@@ -467,8 +494,6 @@ def ajax_crossover(request):
 
         if fakecrossoverllm:
             attributes_to_mutate = [["architectural style"], ["colors"], ["site"], ["colors"]]
-
-        # print(attributes_to_mutate)
 
         flattened_attributes_to_mutate = [item for sublist in attributes_to_mutate for item in sublist]
 

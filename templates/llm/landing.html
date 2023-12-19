@@ -230,7 +230,7 @@ $(document).ready(function() {
     final = attributesDictionary[finalSelectedImageID];
 
     final_image = $('#' + parentIdStub + finalSelectedImageID + " img").attr('src');
-    [final_feedback, final_positives, final_negatives, final_positive_keys, final_negative_keys] = get_feedback_from_id(finalSelectedImageID, final);
+    [final_feedback, final_positives, final_negatives, final_unrated, final_positive_keys, final_negative_keys, final_unrated_keys] = get_feedback_from_id(finalSelectedImageID, final);
 
     $.ajax({
       type: 'POST',
@@ -482,8 +482,10 @@ function get_feedback_from_id(parent_id, parent){
   parent_feedback = {}
   parent_positives = {}
   parent_negatives = {}
+  parent_unrated = {}
   parent_positive_keys = []
   parent_negative_keys = []
+  parent_unrated_keys = []
   $.each( feedback_list , function(){
     key = $(this).find('td:first-child').attr("class");
     key = key.replace("feedback-", "");
@@ -502,9 +504,11 @@ function get_feedback_from_id(parent_id, parent){
       parent_negative_keys.push(key);
     } else {
       parent_feedback[key] = 0;
+      parent_unrated[key] = parent[key];
+      parent_unrated_keys.push(key);
     }
   })
-  return [parent_feedback, parent_positives, parent_negatives, parent_positive_keys, parent_negative_keys];
+  return [parent_feedback, parent_positives, parent_negatives, parent_unrated, parent_positive_keys, parent_negative_keys, parent_unrated_keys];
 }
 
 function scrollToTop(){
@@ -626,12 +630,12 @@ function scrollToTop(){
     parent1_id = selectedResultList[0];
     parent1 = attributesDictionary[parent1_id];
     parent1_image = $('#' + parentIdStub + parent1_id + " img").attr('src');
-    [parent1_feedback, parent1_positives, parent1_negatives, parent1_positive_keys, parent1_negative_keys] = get_feedback_from_id(parent1_id, parent1);
+    [parent1_feedback, parent1_positives, parent1_negatives, parent1_unrated, parent1_positive_keys, parent1_negative_keys, parent1_unrated_keys] = get_feedback_from_id(parent1_id, parent1);
 
     parent2_id = selectedResultList[1];
     parent2 = attributesDictionary[parent2_id];
     parent2_image = $('#' + parentIdStub + parent2_id + " img").attr('src');
-    [parent2_feedback, parent2_positives, parent2_negatives, parent2_positive_keys, parent2_negative_keys] = get_feedback_from_id(parent2_id, parent2);
+    [parent2_feedback, parent2_positives, parent2_negatives, parent2_unrated, parent2_positive_keys, parent2_negative_keys, parent2_unrated_keys] = get_feedback_from_id(parent2_id, parent2);
 
     $.ajax({
       type: 'POST',
@@ -644,16 +648,20 @@ function scrollToTop(){
         'parent1_feedback': JSON.stringify(parent1_feedback),
         'parent1_positives': JSON.stringify(parent1_positives),
         'parent1_negatives': JSON.stringify(parent1_negatives),
+        'parent1_unrated': JSON.stringify(parent1_unrated),
         'parent1_positive_keys': JSON.stringify(parent1_positive_keys),
         'parent1_negative_keys': JSON.stringify(parent1_negative_keys),
+        'parent1_unrated_keys': JSON.stringify(parent1_unrated_keys),
         'parent2_id': parent2_id,
         'parent2': JSON.stringify(parent2),
         'parent2_image': parent2_image,
         'parent2_feedback': JSON.stringify(parent2_feedback),
         'parent2_positives': JSON.stringify(parent2_positives),
         'parent2_negatives': JSON.stringify(parent2_negatives),
+        'parent2_unrated': JSON.stringify(parent2_unrated),
         'parent2_positive_keys': JSON.stringify(parent2_positive_keys),
         'parent2_negative_keys': JSON.stringify(parent2_negative_keys),
+        'parent2_unrated_keys': JSON.stringify(parent2_unrated_keys),
         'user_input': userInput,
         'avoid_values': JSON.stringify(avoidAttributeValues),
         'current_iteration_results': JSON.stringify(currentIterationResults),
