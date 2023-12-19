@@ -460,7 +460,6 @@ def ajax_crossover(request):
                     if is_value_in_list(child[key], unwanted_values):
                         # print(f"value not liked {child[key]}")
                         attributes_to_mutate[i].append(key)
-                        print(attributes_to_mutate[i])
                         # mutated = True
 
                 # if it is not rated good either, then there is a 50% chance it will be added to attributes to mutate
