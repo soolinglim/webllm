@@ -479,9 +479,10 @@ def ajax_crossover(request):
 
             children_list.append(child)
 
-            if not fakecrossoverllm:
-                attribute_to_randomise = random.choice(keyword_examples)
-                attributes_to_mutate[i].append(attribute_to_randomise)
+            # extra fallback mutation
+            # if not fakecrossoverllm:
+            #     attribute_to_randomise = random.choice(keyword_examples)
+            #     attributes_to_mutate[i].append(attribute_to_randomise)
 
             # remove duplicates from attributes to mutate list
             attributes_to_mutate[i] = remove_duplicates_maintaining_order(attributes_to_mutate[i])
