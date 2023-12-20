@@ -65,11 +65,37 @@ body {
   margin-top: 100px;
   margin-bottom: 135px;
 }
+
+/* Default styles for small screens */
+.attributes-loading-text-position {
+  text-align: left;
+  margin-left: 100px;
+}
+
+/* Media query for larger screens */
+@media (min-width: 768px) {
+  .attributes-loading-text-position {
+    text-align: center;
+    margin-left: 0px;
+  }
+}
+
+/* Default styles for small screens */
 .loading-icon-main {
-  padding-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
+  padding-top: 40px;
+  margin-left: 50px;
+  margin-right: 0;
   display: block;
+  text-align: left;
+}
+
+/* Media query for larger screens */
+@media (min-width: 768px) {
+  .loading-icon-main {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
 }
 .loading-icon {
   padding-top: 50px;
@@ -584,7 +610,7 @@ function scrollToTop(){
     var old_height = $(document).height(); /* store document height before modifications */
     var old_scroll = $(window).scrollTop(); /* remember the scroll position */
 
-    $('#prompt-results').prepend('<div id="attributes-loading-gif" class="text-center">Generating attributes<img class="img-fluid loading-icon-main" src="{% static "img/loading.gif" %}" width="50" height="50"/></div>');
+    $('#prompt-results').prepend('<div id="attributes-loading-gif" class="attributes-loading-text-position">Generating attributes<img class="img-fluid loading-icon-main" src="{% static "img/loading.gif" %}" width="50" height="50"/></div>');
 
     $(document).scrollTop(old_scroll + $(document).height() - old_height); /* restore "scroll position" */
 
