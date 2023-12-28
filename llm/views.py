@@ -25,10 +25,10 @@ NUM_CHILDREN = 4
 CHATGPT_MODEL = "gpt-4-1106-preview" # "gpt-3.5-turbo" #
 DALLE_MODEL = "dall-e-3" # "dall-e-2" # 
 
-fakeuserinputllm = False
-fakecrossoverllm = False
-fakemutationllm = False
-fakeimagegen = False
+fakeuserinputllm = True
+fakecrossoverllm = True
+fakemutationllm = True
+fakeimagegen = True
 # fakeimagepromptllm = True
 
 MAX_RUNS_PER_PAGE = 5
@@ -40,7 +40,7 @@ if settings.DEBUG == False:
     fakeimagegen = False
     # fakeimagepromptllm = False
 
-fakellm_delay = 0
+fakellm_delay = 5
 
 client = OpenAI()
 
@@ -228,10 +228,14 @@ def extract_json(input_text):
         return input_text.strip()
 
 
+def replace_multiple_white_spaces_with_one(value):
+    return re.sub(' +', ' ', value)
+
+
 def is_value_in_list(new_value, exiting_list):
-    new_value = new_value.replace(',', ' ').strip()
+    new_value = replace_multiple_white_spaces_with_one(new_value.replace(',', ' ').strip())
     for existing_value in exiting_list:
-        existing_value = existing_value.strip()
+        existing_value = replace_multiple_white_spaces_with_one(existing_value.replace(',', ' ').strip())
         if f" {existing_value} " in f" {new_value} " or new_value.startswith(f"{existing_value} ") or new_value.endswith(f" {existing_value}"):
             return True
     return False
