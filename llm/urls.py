@@ -8,6 +8,10 @@ from .views import *
 urlpatterns = [
     re_path(r'^history/(?P<uuid_param>[0-9a-fA-F-]+)/$', get_history, name="llm_history"),
     re_path(r'^history/$', get_all_runs, name="llm_all_runs"),
+    re_path(r'^analysis/$', analysis, name="llm_analysis"),
+    re_path(r'^csv/$', csv_results, name="llm_csv"),
+    re_path(r'^analysis_images/$', analysis_images, name="llm_analysis_images"),
+    re_path(r'^images_first_last_iter/$', images_first_last_iter, name="llm_images_first_last_iter"),
     re_path(r'^$', TemplateView.as_view(template_name="llm/landing.html"), name='llm_landing'),
     path('ajax_process_user_input/', ajax_process_user_input, name='ajax_process_user_input'),
     path('ajax_get_image/', ajax_get_image, name='ajax_get_image'),

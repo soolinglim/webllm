@@ -1,0 +1,98 @@
+{% extends "webllm/base.html" %}
+{% load static %}
+
+
+{% block extended_style %}
+<style>
+.loading-icon-main {
+  padding-top: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.loading-icon {
+  padding-top: 100px;
+  padding-bottom: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.result-bundle {
+  border: 1px solid lightgray; 
+  border-radius: 10px;
+  padding: 10px;
+}
+.result-selected {
+  border: 2px solid red;
+}
+.btn-clicked {
+  background: #ffc0cb !important;
+}
+.img-small {
+  height: 250px;
+}
+</style>
+{% endblock extended_style %}
+
+
+{% block content %}
+
+
+<h1>SCAPE for comparing dalle and scape</h1>
+{% for run in runs %}
+<span>input = "{{ run.user_input }}"<br>
+  scape_images = ["{{ run.final_images.0.image.url }}",<br>
+  "{{ run.final_images.1.image.url }}",<br>
+  "{{ run.final_images.2.image.url }}",<br>
+  "{{ run.final_images.3.image.url }}",]<br>
+  print(input)<br>
+  compare_scape_images(input, scape_images[0], scape_images[1])<br>
+  compare_scape_images(input, scape_images[0], scape_images[2])<br>
+  compare_scape_images(input, scape_images[0], scape_images[3])<br>
+  compare_scape_images(input, scape_images[1], scape_images[2])<br>
+  compare_scape_images(input, scape_images[1], scape_images[3])<br>
+  compare_scape_images(input, scape_images[2], scape_images[3])<br>
+  print("---")<br>
+</span>
+{% endfor %}
+
+<h1>comparing SCAPE initial and final</h1>
+{% for run in runs %}
+<span>input = "{{ run.user_input }}"<br>
+  scape_initial = ["{{ run.initial_images.0.image.url }}",<br>
+  "{{ run.initial_images.1.image.url }}",<br>
+  "{{ run.initial_images.2.image.url }}",<br>
+  "{{ run.initial_images.3.image.url }}",]<br>
+  scape_final = ["{{ run.final_images.0.image.url }}",<br>
+  "{{ run.final_images.1.image.url }}",<br>
+  "{{ run.final_images.2.image.url }}",<br>
+  "{{ run.final_images.3.image.url }}",]<br>
+  print(input)<br>
+  compare_scape_images(input, scape_initial[0], scape_final[0])<br>
+  compare_scape_images(input, scape_initial[0], scape_final[1])<br>
+  compare_scape_images(input, scape_initial[0], scape_final[2])<br>
+  compare_scape_images(input, scape_initial[0], scape_final[3])<br>
+  compare_scape_images(input, scape_initial[1], scape_final[0])<br>
+  compare_scape_images(input, scape_initial[1], scape_final[1])<br>
+  compare_scape_images(input, scape_initial[1], scape_final[2])<br>
+  compare_scape_images(input, scape_initial[1], scape_final[3])<br>
+  compare_scape_images(input, scape_initial[2], scape_final[0])<br>
+  compare_scape_images(input, scape_initial[2], scape_final[1])<br>
+  compare_scape_images(input, scape_initial[2], scape_final[2])<br>
+  compare_scape_images(input, scape_initial[2], scape_final[3])<br>
+  compare_scape_images(input, scape_initial[3], scape_final[0])<br>
+  compare_scape_images(input, scape_initial[3], scape_final[1])<br>
+  compare_scape_images(input, scape_initial[3], scape_final[2])<br>
+  compare_scape_images(input, scape_initial[3], scape_final[3])<br>
+  print("---")<br>
+</span>
+{% endfor %}
+
+
+{% endblock content %}
+
+
+{% block scripts %}
+<script>
+</script>
+{% endblock scripts %}

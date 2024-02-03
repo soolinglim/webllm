@@ -1,0 +1,73 @@
+{% extends "webllm/base.html" %}
+{% load static %}
+
+
+{% block extended_style %}
+<style>
+.loading-icon-main {
+  padding-top: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.loading-icon {
+  padding-top: 100px;
+  padding-bottom: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.result-bundle {
+  border: 1px solid lightgray; 
+  border-radius: 10px;
+  padding: 10px;
+}
+.result-selected {
+  border: 2px solid red;
+}
+.btn-clicked {
+  background: #ffc0cb !important;
+}
+.img-small {
+  height: 300px;
+}
+</style>
+{% endblock extended_style %}
+
+
+{% block content %}
+
+<table class="table table-sm table-bordered">
+  <tbody>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.pk }}</td>
+      <td>{{ run.timestamp }}</td>
+      <td>{{ run.user_input }}<a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></td>
+      <td>
+      {% for image in run.all_images_ordered %}
+      <img src="{{ image.image.url }}" class="img-small">
+      {% endfor %}
+    </td>
+
+
+{% comment %}
+<td>
+    <img src="{{ run.images.0.image.url }}" class="img-small">
+    <img src="{{ run.images.1.image.url }}" class="img-small">
+    <img src="{{ run.images.2.image.url }}" class="img-small">
+    <img src="{{ run.images.3.image.url }}" class="img-small">
+</td>
+{% endcomment %}
+{% endfor %}
+
+</tr>
+
+{% endblock content %}
+</tbody>
+</table>
+
+{% block scripts %}
+<script>
+</script>
+{% endblock scripts %}

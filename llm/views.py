@@ -8,7 +8,7 @@ import time, random
 from urllib.parse import urlparse
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+import csv
 
 import openai
 from openai import OpenAI
@@ -47,6 +47,144 @@ client = OpenAI()
 keyword_examples = ['architectural style', 'site', 'colors', 'lighting', 'shape/form', 'materials']
 
 
+def count_feedback(feedback):
+    feedback_json = json.loads(feedback)
+    count_bad = 0
+    count_good = 0
+
+    for value in feedback_json.values():
+        if value == -1:
+            count_bad += 1
+        elif value == 1:
+            count_good += 1
+
+    return count_bad, count_good
+
+
+def run_results():
+    real_runs = UserInput.objects.exclude(response="fake").exclude(response="").filter(version=1).exclude(hide=True).order_by('-timestamp')
+    max_iteration = 0
+    for run in real_runs:
+        run.images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1] # get the final 4 instance, sorted in the right order
+        run.all_images_ordered = Image.objects.filter(session=run.session).order_by('instance')
+        length = len(run.images)
+        # get the iteration number of the last image
+        run.max_iteration = run.images[length-1].iteration
+        if run.max_iteration > max_iteration:
+            max_iteration = run.max_iteration
+
+        run.iteration_good = []
+        run.iteration_bad = []
+        run.iteration_unrated = []
+        run.iteration_feedback = [] # to count if feedback is provided in that iteration
+
+        for i in range(run.max_iteration):
+            feedback = UserSelectionFeedback.objects.get(session=run.session, iteration=i)
+            run.parent1_feedback = feedback.parent1_feedback
+            parent1_bad, parent1_good = count_feedback(feedback.parent1_feedback)
+            run.parent2_feedback = feedback.parent2_feedback
+            parent2_bad, parent2_good = count_feedback(feedback.parent2_feedback)
+            total_parents_good = parent1_good + parent2_good
+            total_parents_bad = parent1_bad + parent2_bad
+            if total_parents_good == 0 and total_parents_bad == 0: # unrated
+                run.iteration_good.append('n/a')
+                run.iteration_bad.append('n/a')
+                run.iteration_feedback.append(0)
+            else:
+                run.iteration_good.append(total_parents_good)
+                run.iteration_bad.append(total_parents_bad)
+                run.iteration_feedback.append(1)
+            run.iteration_unrated.append(12 - total_parents_good - total_parents_bad)
+
+        # get final feedback
+        try:
+            run.final_feedback = FinalFeedback.objects.get(session=run.session)
+            final_bad, final_good = count_feedback(run.final_feedback.final_feedback)
+            if final_bad == 0 and final_good == 0:
+                run.final_bad_count = 'n/a'
+                run.final_good_count = 'n/a'
+            else:
+                run.final_bad_count = final_bad
+                run.final_good_count = final_good
+        except:
+            pass
+            # run.final_feedback = None
+    return real_runs, max_iteration
+
+def analysis(request):
+    real_runs, max_iteration = run_results()
+
+    # count total good and bad ratings over iterations
+    good_total = []
+    bad_total = []
+    feedback_total = []
+
+    for i in range(max_iteration):
+        good_total_ind = 0
+        bad_total_ind = 0
+        feedback_total_ind = 0
+        for run in real_runs:
+            try:
+                good_total_ind += run.iteration_good[i]
+                bad_total_ind += run.iteration_bad[i]
+                feedback_total_ind += run.iteration_feedback[i]
+            except:
+                pass
+        good_total.append(good_total_ind)
+        bad_total.append(bad_total_ind)
+        feedback_total.append(feedback_total_ind)
+
+    return render(request, 'llm/analysis.html', {
+    'runs': real_runs,
+    'max_iteration': max_iteration,
+    'good_total': good_total,
+    'bad_total': bad_total,
+    'feedback_total': feedback_total,
+    })
+
+def analysis_images(request):
+    real_runs, max_iteration = run_results()
+
+    return render(request, 'llm/analysis_images.html', {
+    'runs': real_runs,
+    })
+
+def csv_results(request):
+    real_runs, max_iteration = run_results()
+
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="results.csv"'},
+    )
+
+    writer = csv.writer(response)
+    writer.writerow(['good0', 'good1', 'good2', 'good3', 'good4', 'good5', 'bad0', 'bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'run id', 'timestamp', 'user input', 'max iteration', 'comment', 'contact', 'good', 'bad'])
+    for run in real_runs:
+        good_list = []
+        bad_list = []
+        for x in range(max_iteration):
+            try:
+                good_list.append(run.iteration_good[x])
+            except:
+                good_list.append('')
+            try:
+                bad_list.append(run.iteration_bad[x])
+            except:
+                bad_list.append('')
+        
+        final_feedback_list = []
+        try:
+            final_feedback_list.append(run.final_feedback.comments)
+            final_feedback_list.append(run.final_feedback.contact)
+            final_feedback_list.append(run.final_good_count)
+            final_feedback_list.append(run.final_bad_count)
+        except:
+            pass
+        writer.writerow(good_list + bad_list + [run.pk, run.timestamp, run.user_input, run.max_iteration] + final_feedback_list)
+
+    return response
+
 # def get_all_runs(request):
 #     real_runs = UserInput.objects.exclude(response="fake").exclude(response="").filter(version=1).exclude(hide=True).order_by('-timestamp')
 #     for run in real_runs:
@@ -55,6 +193,22 @@ keyword_examples = ['architectural style', 'site', 'colors', 'lighting', 'shape/
 #     return render(request, 'llm/all_runs.html', {
 #     'runs': real_runs,
 #     })
+
+
+def images_first_last_iter(request):
+
+    analysis_runs = UserInput.objects.filter(pk__in=[1316,1317,1319,1320,1321,1322,1324,1325,1327,1328])
+
+    for run in analysis_runs:
+        images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1]
+        run.final_images = images
+        images = Image.objects.filter(session=run.session).order_by('instance')[:4] 
+        run.initial_images = images
+
+    return render(request, 'llm/images_first_last_iter.html', {
+        'runs': analysis_runs,
+    })
+
 
 def get_all_runs(request):
     page = request.GET.get('page', 1)  # Get the current page number from the request parameters

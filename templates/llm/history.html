@@ -26,8 +26,11 @@
 {% block content %}
 <h1>{{user_input.user_input}}</h1>
 
-
-
+{% for item in history %}
+  {% for image in item.images %}
+  <p>xxx{{ image.image.url }}</p>
+  {% endfor %}
+  {% endfor }
 
 {% for item in history %}
 

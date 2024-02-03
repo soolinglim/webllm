@@ -1,0 +1,137 @@
+{% extends "webllm/base.html" %}
+{% load static %}
+
+
+{% block extended_style %}
+<style>
+.loading-icon-main {
+  padding-top: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.loading-icon {
+  padding-top: 100px;
+  padding-bottom: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+.result-bundle {
+  border: 1px solid lightgray; 
+  border-radius: 10px;
+  padding: 10px;
+}
+.result-selected {
+  border: 2px solid red;
+}
+.btn-clicked {
+  background: #ffc0cb !important;
+}
+.img-small {
+  height: 300px;
+}
+</style>
+{% endblock extended_style %}
+
+
+{% block content %}
+max iteration: {{ max_iteration }}<br/>
+good total: {{ good_total }}<br/>
+bad total: {{ bad_total }}<br/>
+feedback total: {{ feedback_total }}
+
+{% comment %}
+<br>
+<br>
+{% for run in runs %}
+{{ run.iteration_bad.0 }}, {{ run.iteration_bad.1 }}, {{ run.iteration_bad.2 }}, {{ run.iteration_bad.3 }}, {{ run.iteration_bad.4 }}, {{ run.iteration_bad.5 }},{{ run.iteration_bad.6 }}<br>
+{% endfor %}
+{% endcomment %}
+
+<table class="table table-sm table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Timestamp</th>
+      <th scope="col">User input</th>
+      <th scope="col">Number of iteration</th>
+      {# <th scope="col">Good ratings</th> #}
+      <th scope="col">Good iter 1</th>
+      <th scope="col">Good iter 2</th>
+      <th scope="col">Good iter 3</th>
+      <th scope="col">Good iter 4</th>
+      <th scope="col">Good iter 5</th>
+      <th scope="col">Good iter 6</th>
+      {# <th scope="col">Bad ratings</th> #}
+      <th scope="col">Bad iter 1</th>
+      <th scope="col">Bad iter 2</th>
+      <th scope="col">Bad iter 3</th>
+      <th scope="col">Bad iter 4</th>
+      <th scope="col">Bad iter 5</th>
+      <th scope="col">Bad iter 6</th>
+      <th scope="col">Number of unrated attributes</th>
+      <th scope="col">Final feedback</th>
+      <th scope="col">Contact</th>
+      <th scope="col">Final good count</th>
+      <th scope="col">Final bad count</th>
+      <th scope="col">Final selected image</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.pk }}</td>
+      <td>{{ run.timestamp }}</td>
+      <td>{{ run.user_input }}<a href="{% url 'llm_history' uuid_param=run.session %}"> [View details]</a></small></td>
+      <td>{{ run.max_iteration }}</td>
+      {# <td>{{ run.iteration_good }}</td> #}
+      <td>{{ run.iteration_good.0 }}</td>
+      <td>{{ run.iteration_good.1 }}</td>
+      <td>{{ run.iteration_good.2 }}</td>
+      <td>{{ run.iteration_good.3 }}</td>
+      <td>{{ run.iteration_good.4 }}</td>
+      <td>{{ run.iteration_good.5 }}</td>
+      {# <td>{{ run.iteration_bad }}</td> #}
+      <td>{{ run.iteration_bad.0 }}</td>
+      <td>{{ run.iteration_bad.1 }}</td>
+      <td>{{ run.iteration_bad.2 }}</td>
+      <td>{{ run.iteration_bad.3 }}</td>
+      <td>{{ run.iteration_bad.4 }}</td>
+      <td>{{ run.iteration_bad.5 }}</td>
+      <td>{{ run.iteration_unrated }}</td>
+      {% if run.final_feedback %}
+      <td>{{ run.final_feedback.comments }}</td>
+      <td>{{ run.final_feedback.contact }}</td>
+      <td>{{ run.final_good_count }}</td>
+      <td>{{ run.final_bad_count }}</td>
+      <td><img src="{{ run.final_feedback.final_image }}" class="img-small"></td>
+      {%else %}
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      {% endif %}
+
+
+{% comment %}
+<td>
+    <img src="{{ run.images.0.image.url }}" class="img-small">
+    <img src="{{ run.images.1.image.url }}" class="img-small">
+    <img src="{{ run.images.2.image.url }}" class="img-small">
+    <img src="{{ run.images.3.image.url }}" class="img-small">
+</td>
+{% endcomment %}
+{% endfor %}
+
+</tr>
+
+{% endblock content %}
+</tbody>
+</table>
+
+{% block scripts %}
+<script>
+</script>
+{% endblock scripts %}
