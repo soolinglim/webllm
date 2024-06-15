@@ -731,31 +731,33 @@ function scrollToTop(){
   $('#btn-submit').on('click', function(e){ 
     userInput = $('#user-input').val();
 
-    addGeneratingAttributesSpinner();
+    if (userInput.trim()){
+      addGeneratingAttributesSpinner();
 
-    $("body").css("min-width", "1400px");
+      $("body").css("min-width", "1400px");
 
-    $('#user-input').attr('disabled', true);
-    $('#btn-submit').attr('disabled', true);
-    $.ajax({
-      type: 'POST',
-      data : {
-        'user_input': userInput,
-        'iteration': userIteration,
-      },
-      url: "{% url 'ajax_process_user_input' %}",
-      complete: function(jqXHR, textStatus) {
-        if (textStatus == 'success') {
-          if (jqXHR.responseJSON.status == 'OK'){
-            userSession = jqXHR.responseJSON.session;
-            addImagesToPanel(jqXHR.responseJSON.result);
-          } else {
-            $('#attributes-loading-gif').empty();
-            $('#attributes-loading-gif').append(backendErrorHtml);
+      $('#user-input').attr('disabled', true);
+      $('#btn-submit').attr('disabled', true);
+      $.ajax({
+        type: 'POST',
+        data : {
+          'user_input': userInput,
+          'iteration': userIteration,
+        },
+        url: "{% url 'ajax_process_user_input' %}",
+        complete: function(jqXHR, textStatus) {
+          if (textStatus == 'success') {
+            if (jqXHR.responseJSON.status == 'OK'){
+              userSession = jqXHR.responseJSON.session;
+              addImagesToPanel(jqXHR.responseJSON.result);
+            } else {
+              $('#attributes-loading-gif').empty();
+              $('#attributes-loading-gif').append(backendErrorHtml);
+            }
           }
         }
-      }
-    });
+      });
+    }
   });
 
 });
