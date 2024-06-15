@@ -26,11 +26,13 @@
 {% block content %}
 <h1>{{user_input.user_input}}</h1>
 
+{% comment %}
 {% for item in history %}
   {% for image in item.images %}
   <p>xxx{{ image.image.url }}</p>
   {% endfor %}
-  {% endfor }
+  {% endfor %}
+  {% endcomment %}
 
 {% for item in history %}
 
