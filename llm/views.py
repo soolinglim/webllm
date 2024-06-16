@@ -1043,39 +1043,44 @@ def ajax_get_image(request):
         user_input = request.POST.get('user_input')
         attributes = request.POST.get('attributes')
 
-        prompt = convert_attributes_to_dalle_prompt(user_input, attributes)
+        if user_input:
+            prompt = convert_attributes_to_dalle_prompt(user_input, attributes)
 
-        if fakeimagegen:
-            dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = fake_generate_image(prompt)
-        else:
-            dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = generate_image(prompt)
-
-        response = requests.get(dalle_image_url)
-        if response.status_code == 200:
-            parsed_url = urlparse(dalle_image_url) # get the url (without url parameters)
-
-            base, extension = os.path.splitext(parsed_url.path) # get the file extension
-
-            image_name = str(uuid.uuid4()) + extension # generate unique name
-            
-            # Create a ContentFile from the binary image data
-            content_file = ContentFile(response.content, name=image_name)
-
-            if not fakeimagegen:
-                image_model = Image(session=session, iteration=iteration, instance=instance, response=dalle_response, prompt=prompt, attributes=attributes, revised_prompt=revised_prompt, start_time=start_time, end_time=end_time, elapsed_time=elapsed_time)
-                image_model.image.save(image_name, content_file)
-                image_model.save()
-                response_data['result'] = image_model.image.url
+            if fakeimagegen:
+                dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = fake_generate_image(prompt)
             else:
-                response_data['result'] = dalle_image_url
+                dalle_response, dalle_image_url, revised_prompt, start_time, end_time, elapsed_time = generate_image(prompt)
 
-            response_data['status'] = "OK"
-            response_data['prompt'] = prompt
-            response_data['revised_prompt'] = revised_prompt
+            response = requests.get(dalle_image_url)
+            if response.status_code == 200:
+                parsed_url = urlparse(dalle_image_url) # get the url (without url parameters)
+
+                base, extension = os.path.splitext(parsed_url.path) # get the file extension
+
+                image_name = str(uuid.uuid4()) + extension # generate unique name
+                
+                # Create a ContentFile from the binary image data
+                content_file = ContentFile(response.content, name=image_name)
+
+                if not fakeimagegen:
+                    image_model = Image(session=session, iteration=iteration, instance=instance, response=dalle_response, prompt=prompt, attributes=attributes, revised_prompt=revised_prompt, start_time=start_time, end_time=end_time, elapsed_time=elapsed_time)
+                    image_model.image.save(image_name, content_file)
+                    image_model.save()
+                    response_data['result'] = image_model.image.url
+                else:
+                    response_data['result'] = dalle_image_url
+
+                response_data['status'] = "OK"
+                response_data['prompt'] = prompt
+                response_data['revised_prompt'] = revised_prompt
+
+            else:
+                response_data['status'] = "ERROR"
+                mail_admins(f"Error at {get_current_function_name()}", f"Session: {session}\n\nIteration: {iteration}\n\nInstance: {instance}\n\nUser input: {user_input}\n\nAttributes: {attributes}\n\nPrompt: {prompt}\n\nCan't get image: {dalle_image_url}\n\nError: {str(response.status_code)}", fail_silently=False, connection=None, html_message=None)
 
         else:
             response_data['status'] = "ERROR"
-            mail_admins(f"Error at {get_current_function_name()}", f"Session: {session}\n\nIteration: {iteration}\n\nInstance: {instance}\n\nUser input: {user_input}\n\nAttributes: {attributes}\n\nPrompt: {prompt}\n\nCan't get image: {dalle_image_url}\n\nError: {str(response.status_code)}", fail_silently=False, connection=None, html_message=None)
+            mail_admins(f"Empty user input: Error at {get_current_function_name()}", f"Session: {session}\n\nIteration: {iteration}\n\nInstance: {instance}\n\nUser input: {user_input}\n\nAttributes: {attributes}\n\nPrompt: {prompt}\n\nCan't get image: {dalle_image_url}\n\nError: {str(response.status_code)}", fail_silently=False, connection=None, html_message=None)
 
     except Exception as e:
         response_data['status'] = "ERROR"
@@ -1090,44 +1095,48 @@ def ajax_process_user_input(request):
     try:
         user_input = request.POST.get('user_input')
 
-        mail_admins(f"New usage", f"User input: {user_input}", fail_silently=False, connection=None, html_message=None)
+        if user_input:
+            mail_admins(f"New usage", f"User input: {user_input}", fail_silently=False, connection=None, html_message=None)
 
-        iteration = request.POST.get('iteration')
+            iteration = request.POST.get('iteration')
 
-        session = uuid.uuid4()
+            session = uuid.uuid4()
 
-        # save this in case prompt breaks
-        UserInputInitial.objects.create(
-            session=session,
-            iteration=iteration,
-            user_input=user_input,
-        )
+            # save this in case prompt breaks
+            UserInputInitial.objects.create(
+                session=session,
+                iteration=iteration,
+                user_input=user_input,
+            )
 
-        prompt = get_prompt_to_convert_user_input_into_json(user_input)
+            prompt = get_prompt_to_convert_user_input_into_json(user_input)
 
-        # print(prompt)
+            # print(prompt)
 
-        if fakeuserinputllm:
-            completion, result, start_time, end_time, elapsed_time = run_fake_process_user_input_llm(prompt)
+            if fakeuserinputllm:
+                completion, result, start_time, end_time, elapsed_time = run_fake_process_user_input_llm(prompt)
+            else:
+                completion, result, start_time, end_time, elapsed_time = run_llm(prompt=prompt, email=True)
+
+            UserInput.objects.create(
+                session=session,
+                iteration=iteration,
+                user_input=user_input,
+                prompt=prompt,
+                response=completion,
+                result=result,
+                start_time=start_time,
+                end_time=end_time,
+                elapsed_time=elapsed_time,
+                version=1,
+            )
+
+            response_data['status'] = "OK"
+            response_data['result'] = json.loads(result)
+            response_data['session'] = session
         else:
-            completion, result, start_time, end_time, elapsed_time = run_llm(prompt=prompt, email=True)
+            mail_admins(f"Empty user input: New usage", f"User input: {user_input}", fail_silently=False, connection=None, html_message=None)
 
-        UserInput.objects.create(
-            session=session,
-            iteration=iteration,
-            user_input=user_input,
-            prompt=prompt,
-            response=completion,
-            result=result,
-            start_time=start_time,
-            end_time=end_time,
-            elapsed_time=elapsed_time,
-            version=1,
-        )
-
-        response_data['status'] = "OK"
-        response_data['result'] = json.loads(result)
-        response_data['session'] = session
     except Exception as e:
         response_data['status'] = "ERROR"
         mail_admins(f"Error at {get_current_function_name()}", f"User input: {user_input}\n\nError: {str(e)}", fail_silently=False, connection=None, html_message=None)
