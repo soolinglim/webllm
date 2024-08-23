@@ -88,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         # 'NAME': os.environ["DATABASE_NAME"],
-        'NAME': 'webllmdb', # 'webllmdb', 'webllmdb_prod'
+        'NAME': 'webllmdb', #'webllmdb_prod', # 'webllmdb',
         'USER': os.environ["DATABASE_USER"],
         'PASSWORD': os.environ["DATABASE_PWD"],
         'HOST': '', # Set to empty string for localhost. Not used with sqlite3.

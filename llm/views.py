@@ -22,13 +22,13 @@ from .models import *
 
 PROBABILITY_MUTATE = 1.0
 NUM_CHILDREN = 4
-CHATGPT_MODEL = "gpt-4-1106-preview" # "gpt-3.5-turbo" #
+CHATGPT_MODEL = "gpt-4-1106-preview" # list of models: "gpt-4-1106-preview" # "gpt-4o-2024-05-13" # "gpt-4o-mini-2024-07-18" # gpt-3.5-turbo-0125
 DALLE_MODEL = "dall-e-3" # "dall-e-2" # 
 
-fakeuserinputllm = True
-fakecrossoverllm = True
-fakemutationllm = True
-fakeimagegen = True
+fakeuserinputllm = False
+fakecrossoverllm = False
+fakemutationllm = False
+fakeimagegen = False
 # fakeimagepromptllm = True
 
 MAX_RUNS_PER_PAGE = 5
@@ -68,47 +68,48 @@ def run_results():
         run.images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1] # get the final 4 instance, sorted in the right order
         run.all_images_ordered = Image.objects.filter(session=run.session).order_by('instance')
         length = len(run.images)
-        # get the iteration number of the last image
-        run.max_iteration = run.images[length-1].iteration
-        if run.max_iteration > max_iteration:
-            max_iteration = run.max_iteration
+        if length > 0:
+            # get the iteration number of the last image
+            run.max_iteration = run.images[length-1].iteration
+            if run.max_iteration > max_iteration:
+                max_iteration = run.max_iteration
 
-        run.iteration_good = []
-        run.iteration_bad = []
-        run.iteration_unrated = []
-        run.iteration_feedback = [] # to count if feedback is provided in that iteration
+            run.iteration_good = []
+            run.iteration_bad = []
+            run.iteration_unrated = []
+            run.iteration_feedback = [] # to count if feedback is provided in that iteration
 
-        for i in range(run.max_iteration):
-            feedback = UserSelectionFeedback.objects.get(session=run.session, iteration=i)
-            run.parent1_feedback = feedback.parent1_feedback
-            parent1_bad, parent1_good = count_feedback(feedback.parent1_feedback)
-            run.parent2_feedback = feedback.parent2_feedback
-            parent2_bad, parent2_good = count_feedback(feedback.parent2_feedback)
-            total_parents_good = parent1_good + parent2_good
-            total_parents_bad = parent1_bad + parent2_bad
-            if total_parents_good == 0 and total_parents_bad == 0: # unrated
-                run.iteration_good.append('n/a')
-                run.iteration_bad.append('n/a')
-                run.iteration_feedback.append(0)
-            else:
-                run.iteration_good.append(total_parents_good)
-                run.iteration_bad.append(total_parents_bad)
-                run.iteration_feedback.append(1)
-            run.iteration_unrated.append(12 - total_parents_good - total_parents_bad)
+            for i in range(run.max_iteration):
+                feedback = UserSelectionFeedback.objects.get(session=run.session, iteration=i)
+                run.parent1_feedback = feedback.parent1_feedback
+                parent1_bad, parent1_good = count_feedback(feedback.parent1_feedback)
+                run.parent2_feedback = feedback.parent2_feedback
+                parent2_bad, parent2_good = count_feedback(feedback.parent2_feedback)
+                total_parents_good = parent1_good + parent2_good
+                total_parents_bad = parent1_bad + parent2_bad
+                if total_parents_good == 0 and total_parents_bad == 0: # unrated
+                    run.iteration_good.append('n/a')
+                    run.iteration_bad.append('n/a')
+                    run.iteration_feedback.append(0)
+                else:
+                    run.iteration_good.append(total_parents_good)
+                    run.iteration_bad.append(total_parents_bad)
+                    run.iteration_feedback.append(1)
+                run.iteration_unrated.append(12 - total_parents_good - total_parents_bad)
 
-        # get final feedback
-        try:
-            run.final_feedback = FinalFeedback.objects.get(session=run.session)
-            final_bad, final_good = count_feedback(run.final_feedback.final_feedback)
-            if final_bad == 0 and final_good == 0:
-                run.final_bad_count = 'n/a'
-                run.final_good_count = 'n/a'
-            else:
-                run.final_bad_count = final_bad
-                run.final_good_count = final_good
-        except:
-            pass
-            # run.final_feedback = None
+            # get final feedback
+            try:
+                run.final_feedback = FinalFeedback.objects.get(session=run.session)
+                final_bad, final_good = count_feedback(run.final_feedback.final_feedback)
+                if final_bad == 0 and final_good == 0:
+                    run.final_bad_count = 'n/a'
+                    run.final_good_count = 'n/a'
+                else:
+                    run.final_bad_count = final_bad
+                    run.final_good_count = final_good
+            except:
+                pass
+                # run.final_feedback = None
     return real_runs, max_iteration
 
 def analysis(request):
@@ -197,7 +198,11 @@ def csv_results(request):
 
 def images_first_last_iter(request):
 
-    analysis_runs = UserInput.objects.filter(pk__in=[1316,1317,1319,1320,1321,1322,1324,1325,1327,1328])
+    # analysis_runs = UserInput.objects.filter(pk__in=[1316,1317,1319,1320,1321,1322,1324,1325,1327,1328]) # cec evaluation (scape gpt-4)
+
+    analysis_runs = UserInput.objects.filter(pk__in=[1345,1342,1344,1346,1347,1348,1349,1350,1351,1352,]) # cim evaluation gpt-4o-mini
+    # analysis_runs = UserInput.objects.filter(pk__in=[1353,1354,1355,1356,1357,1358,1359,1360,1361,1362]) # cim evaluation gpt-4o
+    # analysis_runs = UserInput.objects.filter(pk__in=[1363,1364,1365,1367,1368,1384,1380,1382,1386,1388]) # cim evaluation gpt-4
 
     for run in analysis_runs:
         images = Image.objects.filter(session=run.session).order_by('-instance')[:4][::-1]

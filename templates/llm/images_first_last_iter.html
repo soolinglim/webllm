@@ -41,10 +41,10 @@
 <h1>SCAPE for comparing dalle and scape</h1>
 {% for run in runs %}
 <span>input = "{{ run.user_input }}"<br>
-  scape_images = ["{{ run.final_images.0.image.url }}",<br>
-  "{{ run.final_images.1.image.url }}",<br>
-  "{{ run.final_images.2.image.url }}",<br>
-  "{{ run.final_images.3.image.url }}",]<br>
+  scape_images = ["{{ run.initial_images.0.image.url }}",<br>
+  "{{ run.initial_images.1.image.url }}",<br>
+  "{{ run.initial_images.2.image.url }}",<br>
+  "{{ run.initial_images.3.image.url }}",]<br>
   print(input)<br>
   compare_scape_images(input, scape_images[0], scape_images[1])<br>
   compare_scape_images(input, scape_images[0], scape_images[2])<br>
